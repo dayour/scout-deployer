@@ -6,7 +6,7 @@
 
 .DESCRIPTION
     Phase 1 — Binary Deployment:
-      1. Prompts for target machine (IP or hostname) and darbot credentials.
+      1. Prompts for target machine (IP or hostname) and credentials.
       2. Discovers host key fingerprint and validates SSH connectivity.
       3. Enumerates user profiles under C:\Users\ on the remote node.
       4. Presents a selection menu — pick individual accounts or deploy to all.
@@ -31,14 +31,19 @@
 
     Logging:
       All output is written to both console and a timestamped .log file under
-      $LogDir (default: clippy_cluster_nodes\Logs\).
+      $LogDir (default: <script-dir>\Logs\).
       Log format: [YYYY-MM-DD HH:MM:SS] [LEVEL] message
+
+    Configuration:
+      Environment variables are loaded from .env file (if present) and system environment.
+      See .env.template for all available configuration options.
+      Priority: command-line parameters > environment variables > .env file > defaults.
 
 .PARAMETER InstallerPath
     Path to MicrosoftScout-Windows-*.exe on the local machine.
 
-.PARAMETER DarbotPassword
-    darbot account password on the target. Prompted if blank.
+.PARAMETER TargetPassword
+    Password for the target user account. Prompted if blank.
 
 .PARAMETER PuTTYDir
     Directory containing plink.exe and pscp.exe.
@@ -47,13 +52,13 @@
     Directory where .log files are written. Created if absent.
 
 .PARAMETER LocalSkillsRoot
-    Local source for skills deployment. Default: %USERPROFILE%\.copilot\skills
+    Local source for skills deployment. Default from config or C:\Users\<user>\.copilot\skills
 
 .PARAMETER LocalMemoryRoot
-    Local source for memory data deployment. Default: %USERPROFILE%\.copilot\memory
+    Local source for memory data deployment. Default from config or C:\Users\<user>\.copilot\memory
 
 .PARAMETER LocalSessionRoot
-    Local source for session history deployment. Default: %USERPROFILE%\.copilot\session-state
+    Local source for session history deployment. Default from config or C:\Users\<user>\.copilot\session-state
 
 .PARAMETER LocalConnectorsRoot
     Local source for connector manifests. Default: <script-dir>\connectors
@@ -71,49 +76,77 @@
 .NOTES
     Prerequisites:
       - PuTTY (plink.exe / pscp.exe) at C:\Program Files\PuTTY\
-      - SSH key %USERPROFILE%\.ssh\id_ed25519_shared authorised on the target.
-      - darbot account is a local Administrator on the target node.
-      - Scout installer at $InstallerPath (default: dayour Downloads folder).
-      - Contoso tenant: 00000000-0000-0000-0000-000000000000
-      - ClippyClaw app reg: 11111111-1111-1111-1111-111111111111
+      - SSH key authorized on the target node
+      - Target user account is a local Administrator on the target node
+      - Scout installer available at configured path
+      - .env file configured with your tenant details (copy from .env.template)
 
-    Frontier gate requires interactive sign-in as darbot@contoso.example after deploy.
+    Frontier gate requires interactive sign-in with your licensed user after deploy.
 #>
 
 [CmdletBinding()]
 param(
-    [string] $InstallerPath = "%USERPROFILE%\Downloads\MicrosoftScout-Windows-0.22.333-x64-Setup.exe",
-    [string] $DarbotPassword = "",
-    [string] $PuTTYDir       = "C:\Program Files\PuTTY",
-    [string] $LogDir         = "",
-    [string] $LocalSkillsRoot       = "%USERPROFILE%\.copilot\skills",
-    [string] $LocalMemoryRoot       = "%USERPROFILE%\.copilot\memory",
-    [string] $LocalSessionRoot      = "%USERPROFILE%\.copilot\session-state",
+    [string] $InstallerPath         = "",
+    [string] $TargetPassword        = "",
+    [string] $PuTTYDir              = "",
+    [string] $LogDir                = "",
+    [string] $LocalSkillsRoot       = "",
+    [string] $LocalMemoryRoot       = "",
+    [string] $LocalSessionRoot      = "",
     [string] $LocalConnectorsRoot   = "",
     [string] $LocalMcpManifestsRoot = "",
     [string] $LocalAutomationsRoot  = "",
-    [string] $LocalExtensionsList   = ""
+    [string] $LocalExtensionsList   = "",
+    [switch] $ShowConfig
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-# ── Script-level paths ────────────────────────────────────────────────────────
+# ── Load configuration module ─────────────────────────────────────────────────
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+Import-Module (Join-Path $ScriptDir "ScoutConfig.psm1") -Force
 
-if ([string]::IsNullOrEmpty($LogDir)) {
-    $LogDir = Join-Path $ScriptDir "Logs"
+# Load configuration from .env and environment variables
+$Config = Get-ScoutConfig -ScriptRoot $ScriptDir
+
+# Override with command-line parameters if provided
+if ($InstallerPath)         { $Config.InstallerPath         = $InstallerPath }
+if ($PuTTYDir)              { $Config.PuttyDir              = $PuTTYDir }
+if ($LogDir)                { $Config.LogDir                = $LogDir }
+if ($LocalSkillsRoot)       { $Config.LocalSkillsRoot       = $LocalSkillsRoot }
+if ($LocalMemoryRoot)       { $Config.LocalMemoryRoot       = $LocalMemoryRoot }
+if ($LocalSessionRoot)      { $Config.LocalSessionRoot      = $LocalSessionRoot }
+if ($LocalConnectorsRoot)   { $Config.LocalConnectorsRoot   = $LocalConnectorsRoot }
+if ($LocalMcpManifestsRoot) { $Config.LocalMcpManifestsRoot = $LocalMcpManifestsRoot }
+if ($LocalAutomationsRoot)  { $Config.LocalAutomationsRoot  = $LocalAutomationsRoot }
+if ($LocalExtensionsList)   { $Config.LocalExtensionsList   = $LocalExtensionsList }
+
+# If -ShowConfig is passed, display configuration and exit
+if ($ShowConfig) {
+    Show-ScoutConfig -Config $Config
+    exit 0
 }
-if ([string]::IsNullOrEmpty($LocalConnectorsRoot))   { $LocalConnectorsRoot   = Join-Path $ScriptDir "connectors" }
-if ([string]::IsNullOrEmpty($LocalMcpManifestsRoot)) { $LocalMcpManifestsRoot = Join-Path $ScriptDir "mcp-manifests" }
-if ([string]::IsNullOrEmpty($LocalAutomationsRoot))  { $LocalAutomationsRoot  = Join-Path $ScriptDir "automations" }
-if ([string]::IsNullOrEmpty($LocalExtensionsList))   { $LocalExtensionsList   = Join-Path $ScriptDir "extensions.txt" }
 
-if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out-Null }
+# ── Script-level paths (from config) ─────────────────────────────────────────
+
+# Ensure log directory exists
+if (-not (Test-Path $Config.LogDir)) { New-Item -ItemType Directory -Path $Config.LogDir | Out-Null }
 
 $RunTimestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$LogFile      = Join-Path $LogDir "ScoutDeployer_${RunTimestamp}.log"
+$LogFile      = Join-Path $Config.LogDir "ScoutDeployer_${RunTimestamp}.log"
+
+# Convenience variables for backward compatibility
+$InstallerPath         = $Config.InstallerPath
+$PuTTYDir             = $Config.PuttyDir
+$LocalSkillsRoot      = $Config.LocalSkillsRoot
+$LocalMemoryRoot      = $Config.LocalMemoryRoot
+$LocalSessionRoot     = $Config.LocalSessionRoot
+$LocalConnectorsRoot  = $Config.LocalConnectorsRoot
+$LocalMcpManifestsRoot = $Config.LocalMcpManifestsRoot
+$LocalAutomationsRoot = $Config.LocalAutomationsRoot
+$LocalExtensionsList  = $Config.LocalExtensionsList
 
 # ── Logging framework ─────────────────────────────────────────────────────────
 
@@ -154,8 +187,14 @@ function Log-RemoteOutput {
 # ── Banner ────────────────────────────────────────────────────────────────────
 
 Log-Section "ScoutDeployer — $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+Log-Info "System: $($Config.SystemName)"
+Log-Info "Tenant: $($Config.TenantName) ($($Config.Domain))"
+Log-Info "Licensed User: $($Config.LicensedUser)"
+Log-Info "Scout Version: $($Config.ScoutVersion)"
 Log-Info "Log file: $LogFile"
-Log-Info "Scout installer: $InstallerPath"
+Log-Info "Installer: $InstallerPath"
+Log-Info ""
+Log-Info "TIP: Run with -ShowConfig to display full configuration without deploying"
 
 # ── Validate local prerequisites ──────────────────────────────────────────────
 
@@ -189,10 +228,11 @@ Log-Ok "Target: $target"
 
 # ── Step 2 — Credentials ─────────────────────────────────────────────────────
 
-Log-Step "Step 2/8 — darbot credentials"
-if ([string]::IsNullOrEmpty($DarbotPassword)) {
-    $securePw      = Read-Host "  darbot password for $target" -AsSecureString
-    $DarbotPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+Log-Step "Step 2/8 — Target user credentials"
+Log-Info "Target user: $($Config.TargetUser)"
+if ([string]::IsNullOrEmpty($TargetPassword)) {
+    $securePw       = Read-Host "  Password for $($Config.TargetUser)@$target" -AsSecureString
+    $TargetPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
         [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePw))
 }
 Log-Info "Credentials accepted (password not logged)."
@@ -201,7 +241,7 @@ Log-Info "Credentials accepted (password not logged)."
 
 Log-Step "Step 3/8 — Discover host key and validate connectivity"
 
-$keyScan     = & $plink -ssh "darbot@$target" -pw $DarbotPassword -batch "echo CONNECTED" 2>&1
+$keyScan     = & $plink -ssh "$($Config.TargetUser)@$target" -pw $TargetPassword -batch "echo CONNECTED" 2>&1
 $hostKeyLine = $keyScan | Where-Object { $_ -match "SHA256:" } | Select-Object -First 1
 $hostKey     = ""
 
@@ -215,9 +255,9 @@ if ($hostKeyLine -match "(ssh-\S+\s+\d+\s+SHA256:\S+)") {
 function Invoke-Remote {
     param([string] $Cmd, [switch] $NoLog)
     $out = if ($hostKey) {
-        & $plink -ssh "darbot@$target" -pw $DarbotPassword -hostkey $hostKey $Cmd 2>&1
+        & $plink -ssh "$($Config.TargetUser)@$target" -pw $TargetPassword -hostkey $hostKey $Cmd 2>&1
     } else {
-        & $plink -ssh "darbot@$target" -pw $DarbotPassword -batch $Cmd 2>&1
+        & $plink -ssh "$($Config.TargetUser)@$target" -pw $TargetPassword -batch $Cmd 2>&1
     }
     if (-not $NoLog) { Log-RemoteOutput $out }
     return $out
@@ -225,11 +265,11 @@ function Invoke-Remote {
 
 function Copy-ToRemote {
     param([string] $Local, [string] $Remote)
-    Log-Info "Copying $Local -> darbot@${target}:$Remote"
+    Log-Info "Copying $Local -> $($Config.TargetUser)@${target}:$Remote"
     $out = if ($hostKey) {
-        & $pscp -pw $DarbotPassword -hostkey $hostKey $Local "darbot@${target}:$Remote" 2>&1
+        & $pscp -pw $TargetPassword -hostkey $hostKey $Local "$($Config.TargetUser)@${target}:$Remote" 2>&1
     } else {
-        & $pscp -pw $DarbotPassword -batch $Local "darbot@${target}:$Remote" 2>&1
+        & $pscp -pw $TargetPassword -batch $Local "$($Config.TargetUser)@${target}:$Remote" 2>&1
     }
     Log-RemoteOutput $out "    pscp> "
     return $out
@@ -237,11 +277,11 @@ function Copy-ToRemote {
 
 function Copy-DirToRemote {
     param([string] $LocalDir, [string] $RemoteDir)
-    Log-Info "Recursive copy $LocalDir -> darbot@${target}:$RemoteDir"
+    Log-Info "Recursive copy $LocalDir -> $($Config.TargetUser)@${target}:$RemoteDir"
     $out = if ($hostKey) {
-        & $pscp -pw $DarbotPassword -hostkey $hostKey -r $LocalDir "darbot@${target}:$RemoteDir" 2>&1
+        & $pscp -pw $TargetPassword -hostkey $hostKey -r $LocalDir "$($Config.TargetUser)@${target}:$RemoteDir" 2>&1
     } else {
-        & $pscp -pw $DarbotPassword -batch -r $LocalDir "darbot@${target}:$RemoteDir" 2>&1
+        & $pscp -pw $TargetPassword -batch -r $LocalDir "$($Config.TargetUser)@${target}:$RemoteDir" 2>&1
     }
     Log-RemoteOutput $out "    pscp> "
     return $out
@@ -249,11 +289,11 @@ function Copy-DirToRemote {
 
 $test = Invoke-Remote "echo SCOUT_DEPLOYER_CONNECTED" -NoLog
 if ($test -notcontains "SCOUT_DEPLOYER_CONNECTED") {
-    Log-Error "SSH connection failed to $target as darbot."
+    Log-Error "SSH connection failed to $target as $($Config.TargetUser)."
     Log-Error ($test -join " | ")
     exit 1
 }
-Log-Ok "SSH connectivity confirmed: darbot@$target"
+Log-Ok "SSH connectivity confirmed: $($Config.TargetUser)@$target"
 
 # ── Step 4 — Discover user profiles ──────────────────────────────────────────
 

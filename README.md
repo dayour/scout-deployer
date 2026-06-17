@@ -1,21 +1,68 @@
 # ScoutDeployer
 
-Deploy Microsoft Scout 0.22.333 to Windows cluster nodes in the Contoso tenant
-and provision skills, connectors, MCP tools, permissions, memory, extensions,
-session history, and automations — all over SSH via PuTTY.
+Deploy Microsoft Scout to Windows cluster nodes and provision skills, connectors, 
+MCP tools, permissions, memory, extensions, session history, and automations — all over SSH via PuTTY.
+
+GENERICIZED — Configure your tenant via `.env` file for multi-tenant/multi-fleet deployments.
+
+## Quick Start
+
+1. Copy `.env.template` to `.env` and configure your tenant details
+2. Run `.\ScoutDeployer.ps1` or `ScoutDeployer.cmd`
+3. Enter target machine IP and credentials when prompted
+
+## Configuration
+
+All deployment settings are configurable via environment variables. Create a `.env` file 
+from the template to customize for your tenant:
+
+```powershell
+# Copy template and edit
+cp .env.template .env
+notepad .env
+```
+
+### Key Configuration Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `SCOUT_TENANT_NAME` | Your organization name | Contoso |
+| `SCOUT_TENANT_ID` | Entra tenant GUID | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
+| `SCOUT_DOMAIN` | Primary domain | contoso.com |
+| `SCOUT_LICENSED_USER` | User with M365 Copilot license | admin@contoso.com |
+| `SCOUT_APP_REG_ID` | Scout app registration ID | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
+| `SCOUT_PRIMARY_NODE_IP` | First deployment target | 192.0.2.10 |
+| `SCOUT_TARGET_USER` | Admin account on target nodes | administrator |
+| `SCOUT_SYSTEM_NAME` | Friendly name for this fleet | Contoso Scout Cluster |
+
+See `.env.template` for all available configuration options.
+
+### Viewing Current Configuration
+
+```powershell
+.\ScoutDeployer.ps1 -ShowConfig
+```
+
+This displays all active configuration values without running deployment.
 
 ## Tenant
 
-| Field          | Value                                    |
-|----------------|------------------------------------------|
-| Tenant name    | Contoso (contoso.example)                |
-| Tenant ID      | 00000000-0000-0000-0000-000000000000     |
-| Domain         | contoso.com / contoso.example             |
-| Licensed user  | darbot@contoso.example (M365 Copilot)       |
-| App reg        | 11111111-1111-1111-1111-111111111111     |
-| Scout version  | 0.22.333                                 |
+Configure in `.env` file — defaults shown from template:
+
+| Field          | Environment Variable      | Default Example                          |
+|----------------|---------------------------|------------------------------------------|
+| Tenant name    | `SCOUT_TENANT_NAME`       | Contoso                               |
+| Tenant ID      | `SCOUT_TENANT_ID`         | 00000000-0000-0000-0000-000000000000     |
+| Domain         | `SCOUT_DOMAIN`            | contoso.com / contoso.example             |
+| Licensed user  | `SCOUT_LICENSED_USER`     | darbot@contoso.example                      |
+| App reg        | `SCOUT_APP_REG_ID`        | 11111111-1111-1111-1111-111111111111     |
+| Scout version  | `SCOUT_VERSION`           | 0.22.333                                 |
 
 ## Fleet nodes
+
+Configure via `SCOUT_PRIMARY_NODE_IP`, `SCOUT_PRIMARY_NODE_NAME`, and `SCOUT_ADDITIONAL_NODES` in `.env`.
+
+Example fleet (defaults from template):
 
 | Node        | IP          | Status                      |
 |-------------|-------------|-----------------------------|
@@ -25,11 +72,12 @@ session history, and automations — all over SSH via PuTTY.
 
 ## Prerequisites
 
-- PuTTY (`plink.exe` / `pscp.exe`) at `C:\Program Files\PuTTY\`
-- SSH key `%USERPROFILE%\.ssh\id_ed25519_shared` authorised on every target node
-- `darbot` account is a local Administrator on every target node
-- Scout installer at the default path or supplied via `--installer`
+- PuTTY (`plink.exe` / `pscp.exe`) at `C:\Program Files\PuTTY\` (or configured via `PUTTY_DIR`)
+- SSH key authorized on every target node (configured via `SCOUT_SSH_KEY_PATH`)
+- Target user account is a local Administrator on every target node (configured via `SCOUT_TARGET_USER`)
+- Scout installer at the configured path (`SCOUT_INSTALLER_PATH`)
 - Node.js 18+ (for `npx` usage only)
+- `.env` file with your tenant configuration (copy from `.env.template`)
 
 ## Usage
 
