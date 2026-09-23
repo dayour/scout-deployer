@@ -1,9 +1,21 @@
 # Environment configuration (contains sensitive tenant data)
 .env
+.env.*
+!.env.template
+*.secrets.*
 
 # Logs directory (generated at runtime)
 Logs/
 *.log
+
+# Credentials and private key material
+*.key
+*.pem
+*.pfx
+*.p12
+*.ppk
+credentials.json
+secrets.json
 
 # Node modules
 node_modules/

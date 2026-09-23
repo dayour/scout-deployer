@@ -8,8 +8,7 @@ cd /d "%~dp0"
 echo.
 echo ============================================================
 echo  ScoutDeployer — Microsoft Scout Cluster Node Provisioner
-echo  Contoso Tenant  /  contoso.example
-echo  App reg: 11111111-1111-1111-1111-111111111111
+echo  Configure tenant and fleet details in .env
 echo ============================================================
 echo.
 

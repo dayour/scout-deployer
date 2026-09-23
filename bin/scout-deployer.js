@@ -5,7 +5,7 @@
  * Usage:
  *   npx scout-deployer
  *   npx scout-deployer --installer "C:\path\to\MicrosoftScout-Windows-0.22.333-x64-Setup.exe"
- *   npx scout-deployer --target scout-secondary.contoso.com --password secret
+ *   npx scout-deployer --target scout-node.contoso.com
  *   npx scout-deployer --provision all
  *
  * All flags are forwarded to ScoutDeployer.ps1 as named parameters.
@@ -39,7 +39,7 @@ if (!fs.existsSync(scriptPath)) {
 // ── Argument mapping ──────────────────────────────────────────────────────────
 // Convert CLI flags to PowerShell named parameters.
 // --installer "path"  -> -InstallerPath "path"
-// --target host       -> -DarbotPassword is prompted (or --password value)
+// --target host       -> target is collected by the PowerShell prompt
 // --putty-dir path    -> -PuTTYDir "path"
 // --log-dir path      -> -LogDir "path"
 // --skills path       -> -LocalSkillsRoot "path"
@@ -53,7 +53,7 @@ if (!fs.existsSync(scriptPath)) {
 
 const flagMap = {
   '--installer':    '-InstallerPath',
-  '--password':     '-DarbotPassword',
+  '--password':     '-TargetPassword',
   '--putty-dir':    '-PuTTYDir',
   '--log-dir':      '-LogDir',
   '--skills':       '-LocalSkillsRoot',
@@ -91,7 +91,12 @@ while (i < argv.length) {
 
 console.log('[scout-deployer] Launching ScoutDeployer.ps1 ...');
 console.log(`[scout-deployer] Script : ${scriptPath}`);
-console.log(`[scout-deployer] PS args: ${psArgs.slice(4).join(' ')}\n`);
+const displayArgs = psArgs.slice(4);
+const passwordIndex = displayArgs.indexOf('-TargetPassword');
+if (passwordIndex !== -1 && passwordIndex + 1 < displayArgs.length) {
+  displayArgs[passwordIndex + 1] = '[REDACTED]';
+}
+console.log(`[scout-deployer] PS args: ${displayArgs.join(' ')}\n`);
 
 const result = spawnSync('powershell.exe', psArgs, {
   stdio: 'inherit',

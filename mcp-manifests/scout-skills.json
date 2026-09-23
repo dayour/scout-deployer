@@ -2,13 +2,15 @@
   "name": "scout-skills",
   "version": "1.0.0",
   "description": "Copilot m-skills exposed as MCP tools: inverse-debate-theory, intentional-words, cowork-auth-config, cowork-chat, cowork-cli-install, 3dkg, persistent-powershell.",
-  "publisher": "contoso",
+  "publisher": "example",
   "server": {
     "type": "stdio",
     "mcp_config": {
       "command": "node",
-      "args": ["E:\\scout-deployer\\bin\\skills-server.js"],
-      "env": {}
+      "args": ["bin\\skills-server.js"],
+      "env": {
+        "KNOWLEDGE_GRAPH_HOST": "knowledge-graph.example.com"
+      }
     }
   },
   "tools": [
@@ -104,7 +106,7 @@
     },
     {
       "name": "query_3dkg",
-      "description": "Query and work with the 3DKG knowledge graph, txt2kg APIs, DarbotDB (ArangoDB), and QMD MCP memory surface on scout-gateway.contoso.com.",
+      "description": "Query and work with the configured 3DKG knowledge graph, txt2kg APIs, DarbotDB (ArangoDB), and QMD MCP memory surface.",
       "inputSchema": {
         "type": "object",
         "properties": {

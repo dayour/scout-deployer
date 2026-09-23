@@ -13,18 +13,18 @@ Preferred patterns:
 5. For Windows, use Windows paths with backslashes.
 
 Recommended bootstrap for a persistent attached shell:
-- Set a session label variable, e.g. $env:CLAWPILOT_SHELL_ROLE='3dkg-analysis'
-- Set a workspace variable, e.g. $env:CLAWPILOT_WORKDIR='%USERPROFILE%\.copilot\session-state\<session-id>\files\persistent-shell'
+- Set a session label variable, e.g. `$env:SCOUT_SHELL_ROLE='analysis'`
+- Set a workspace variable, e.g. `$env:SCOUT_WORKDIR="$env:USERPROFILE\.copilot\session-state\<session-id>\files\persistent-shell"`
 - Create helper functions: Invoke-LoggedCommand, Start-DetachedCommand, Test-HttpEndpoint, New-McpInitializePayload.
 - Keep the shell alive and ready for write_powershell follow-up commands.
 
-Known 3DKG endpoints useful in persistent shells:
-- txt2kg UI/API base: http://scout-gateway.contoso.com:3001
-- triples API: http://scout-gateway.contoso.com:3001/api/graph-db/triples
-- DarbotDB: http://scout-gateway.contoso.com:8529
-- DarbotDB query API: http://scout-gateway.contoso.com:8530
-- QMD MCP: http://scout-gateway.contoso.com:8181/mcp
-- QMD health: http://scout-gateway.contoso.com:8181/health
+Set `KNOWLEDGE_GRAPH_HOST` before using these endpoint templates:
+- txt2kg UI/API base: `http://<KNOWLEDGE_GRAPH_HOST>:3001`
+- triples API: `http://<KNOWLEDGE_GRAPH_HOST>:3001/api/graph-db/triples`
+- DarbotDB: `http://<KNOWLEDGE_GRAPH_HOST>:8529`
+- DarbotDB query API: `http://<KNOWLEDGE_GRAPH_HOST>:8530`
+- QMD MCP: `http://<KNOWLEDGE_GRAPH_HOST>:8181/mcp`
+- QMD health: `http://<KNOWLEDGE_GRAPH_HOST>:8181/health`
 
 Safety:
 - Do not use destructive process-kill commands by name. Stop detached processes by specific PID only.

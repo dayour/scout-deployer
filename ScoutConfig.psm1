@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Reads environment variables from .env file (if present) and system environment,
-    with fallback to hardcoded defaults. Provides Get-ScoutConfig function that
+    with fallback to safe example defaults. Provides Get-ScoutConfig function that
     returns a hashtable of all configuration values.
 
 .NOTES
@@ -12,7 +12,7 @@
     1. Command-line parameters
     2. Environment variables
     3. .env file
-    4. Hardcoded defaults
+    4. Safe example defaults
 #>
 
 function Get-ScoutConfig {
@@ -37,36 +37,37 @@ function Get-ScoutConfig {
         TenantName    = "Contoso"
         TenantId      = "00000000-0000-0000-0000-000000000000"
         Domain        = "contoso.com"
-        DomainAlt     = "contoso.example"
+        DomainAlt     = ""
         
         # Licensed user
-        LicensedUser  = "darbot@contoso.example"
+        LicensedUser  = "admin@contoso.com"
         
         # App registration
-        AppRegId      = "11111111-1111-1111-1111-111111111111"
-        AppName       = "ClippyClaw"
+        AppClientId   = "11111111-1111-1111-1111-111111111111"
+        AppObjectId   = "22222222-2222-2222-2222-222222222222"
+        AppName       = "Scout"
         
         # Fleet
-        SystemName    = "Contoso Scout Cluster"
-        PrimaryNodeIp = "scout-primary.contoso.com"
+        SystemName      = "Contoso Scout Cluster"
+        PrimaryNodeIp   = "scout-primary.contoso.com"
         PrimaryNodeName = "scout-primary"
         AdditionalNodes = @("scout-gateway.contoso.com", "scout-secondary.contoso.com")
         
         # Deployment credentials
         TargetUser    = "administrator"
-        SshKeyPath    = "%USERPROFILE%\.ssh\id_ed25519_shared"
+        SshKeyPath    = (Join-Path $HOME ".ssh\id_ed25519")
         
         # Scout binary
         ScoutVersion  = "0.22.333"
-        InstallerPath = "%USERPROFILE%\Downloads\MicrosoftScout-Windows-0.22.333-x64-Setup.exe"
+        InstallerPath = (Join-Path $HOME "Downloads\MicrosoftScout-Windows-0.22.333-x64-Setup.exe")
         
         # PuTTY
         PuttyDir      = "C:\Program Files\PuTTY"
         
         # Local source paths
-        LocalSkillsRoot       = "%USERPROFILE%\.copilot\skills"
-        LocalMemoryRoot       = "%USERPROFILE%\.copilot\memory"
-        LocalSessionRoot      = "%USERPROFILE%\.copilot\session-state"
+        LocalSkillsRoot       = (Join-Path $HOME ".copilot\skills")
+        LocalMemoryRoot       = (Join-Path $HOME ".copilot\memory")
+        LocalSessionRoot      = (Join-Path $HOME ".copilot\session-state")
         LocalConnectorsRoot   = (Join-Path $ScriptRoot "connectors")
         LocalMcpManifestsRoot = (Join-Path $ScriptRoot "mcp-manifests")
         LocalAutomationsRoot  = (Join-Path $ScriptRoot "automations")
@@ -104,7 +105,9 @@ function Get-ScoutConfig {
         'SCOUT_DOMAIN'               = 'Domain'
         'SCOUT_DOMAIN_ALT'           = 'DomainAlt'
         'SCOUT_LICENSED_USER'        = 'LicensedUser'
-        'SCOUT_APP_REG_ID'           = 'AppRegId'
+        'SCOUT_APP_CLIENT_ID'        = 'AppClientId'
+        'SCOUT_APP_REG_ID'           = 'AppClientId'
+        'SCOUT_APP_OBJECT_ID'        = 'AppObjectId'
         'SCOUT_APP_NAME'             = 'AppName'
         'SCOUT_SYSTEM_NAME'          = 'SystemName'
         'SCOUT_PRIMARY_NODE_IP'      = 'PrimaryNodeIp'
@@ -161,7 +164,9 @@ function Show-ScoutConfig {
     Write-Host "  ID:            $($Config.TenantId)"
     Write-Host "  Domain:        $($Config.Domain) / $($Config.DomainAlt)"
     Write-Host "  Licensed User: $($Config.LicensedUser)"
-    Write-Host "  App Reg:       $($Config.AppRegId) ($($Config.AppName))"
+    Write-Host "  App Client ID: $($Config.AppClientId)"
+    Write-Host "  App Object ID: $($Config.AppObjectId)"
+    Write-Host "  App Name:      $($Config.AppName)"
     
     Write-Host "`nFleet:" -ForegroundColor Yellow
     Write-Host "  System Name:   $($Config.SystemName)"

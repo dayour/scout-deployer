@@ -231,9 +231,14 @@ Log-Ok "Target: $target"
 Log-Step "Step 2/8 — Target user credentials"
 Log-Info "Target user: $($Config.TargetUser)"
 if ([string]::IsNullOrEmpty($TargetPassword)) {
-    $securePw       = Read-Host "  Password for $($Config.TargetUser)@$target" -AsSecureString
-    $TargetPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-        [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePw))
+    $securePw = Read-Host "  Password for $($Config.TargetUser)@$target" -AsSecureString
+    $passwordPtr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePw)
+    try {
+        $TargetPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPtr)
+    }
+    finally {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPtr)
+    }
 }
 Log-Info "Credentials accepted (password not logged)."
 
@@ -805,8 +810,6 @@ $finalPolicy | Where-Object { $_.Trim() } | ForEach-Object { Log-Info "  $_" }
 
 Write-Host ""
 Write-Host "NOTE: Each deployed user must interactively launch Microsoft Scout on $target"
-Write-Host "      and sign in as darbot@contoso.example to clear the Frontier gate."
-Write-Host "      App registration: 11111111-1111-1111-1111-111111111111"
-Write-Host "      Tenant: contoso.com (00000000-0000-0000-0000-000000000000)"
+Write-Host "      and sign in as $($Config.LicensedUser) to clear the Frontier gate."
 Write-Host ""
 Log-Ok "ScoutDeployer run complete. Full log: $LogFile"

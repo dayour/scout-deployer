@@ -4,7 +4,7 @@
 # This file is deployed to C:\Windows\Temp\extensions.txt on the remote node
 # if VS Code is not present, for manual install via: code --install-extension @extensions.txt
 #
-# Contoso / Scout cluster standard extensions
+# Scout cluster standard extensions
 
 # GitHub Copilot
 github.copilot

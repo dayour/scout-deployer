@@ -40,6 +40,7 @@ const SKILLS_DIR = path.resolve(__dirname, '..', 'skills');
 const SERVER_NAME    = 'scout-skills';
 const SERVER_VERSION = '1.0.0';
 const PROTOCOL_VERSION = '2024-11-05';
+const KNOWLEDGE_GRAPH_HOST = process.env.KNOWLEDGE_GRAPH_HOST || 'knowledge-graph.example.com';
 
 // ── Tool definitions ──────────────────────────────────────────────────────────
 
@@ -177,7 +178,7 @@ const TOOLS = [
     name:        'query_3dkg',
     skillDir:    '3dkg',
     description: 'Query and work with the 3DKG knowledge graph, txt2kg APIs, DarbotDB ' +
-                 '(ArangoDB), and QMD MCP memory surface on scout-gateway.contoso.com.',
+                 `(ArangoDB), and QMD MCP memory surface on ${KNOWLEDGE_GRAPH_HOST}.`,
     inputSchema: {
       type: 'object',
       properties: {

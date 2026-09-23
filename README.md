@@ -30,8 +30,7 @@ notepad .env
 | `SCOUT_TENANT_ID` | Entra tenant GUID | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
 | `SCOUT_DOMAIN` | Primary domain | contoso.com |
 | `SCOUT_LICENSED_USER` | User with M365 Copilot license | admin@contoso.com |
-| `SCOUT_APP_REG_ID` | Scout app registration ID | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
-| `SCOUT_PRIMARY_NODE_IP` | First deployment target | 192.0.2.10 |
+| `SCOUT_PRIMARY_NODE_IP` | First deployment target | Configured in `.env` |
 | `SCOUT_TARGET_USER` | Admin account on target nodes | administrator |
 | `SCOUT_SYSTEM_NAME` | Friendly name for this fleet | Contoso Scout Cluster |
 
@@ -51,24 +50,17 @@ Configure in `.env` file — defaults shown from template:
 
 | Field          | Environment Variable      | Default Example                          |
 |----------------|---------------------------|------------------------------------------|
-| Tenant name    | `SCOUT_TENANT_NAME`       | Contoso                               |
+| Tenant name    | `SCOUT_TENANT_NAME`       | Contoso                                  |
 | Tenant ID      | `SCOUT_TENANT_ID`         | 00000000-0000-0000-0000-000000000000     |
-| Domain         | `SCOUT_DOMAIN`            | contoso.com / contoso.example             |
-| Licensed user  | `SCOUT_LICENSED_USER`     | darbot@contoso.example                      |
-| App reg        | `SCOUT_APP_REG_ID`        | 11111111-1111-1111-1111-111111111111     |
+| Domain         | `SCOUT_DOMAIN`            | contoso.com                              |
+| Licensed user  | `SCOUT_LICENSED_USER`     | admin@contoso.com                        |
 | Scout version  | `SCOUT_VERSION`           | 0.22.333                                 |
 
 ## Fleet nodes
 
 Configure via `SCOUT_PRIMARY_NODE_IP`, `SCOUT_PRIMARY_NODE_NAME`, and `SCOUT_ADDITIONAL_NODES` in `.env`.
 
-Example fleet (defaults from template):
-
-| Node        | IP          | Status                      |
-|-------------|-------------|-----------------------------|
-| scout-primary | scout-primary.contoso.com   | Scout Frontier v0.22.333    |
-| darbotlm    | scout-gateway.contoso.com   | Gateway + 16-route /scout   |
-| scout-secondary | (LAN)      | Deployed 2026-06-15         |
+Keep fleet hostnames and network addresses in the local `.env` file rather than repository documentation.
 
 ## Prerequisites
 
@@ -87,7 +79,7 @@ Example fleet (defaults from template):
 ScoutDeployer.cmd
 ```
 
-Opens a console window, prompts for target machine and darbot password,
+Opens a console window, prompts for the target machine and account password,
 then runs the full deployment interactively.
 
 ### PowerShell direct
@@ -95,7 +87,7 @@ then runs the full deployment interactively.
 ```powershell
 .\ScoutDeployer.ps1
 # With explicit parameters:
-.\ScoutDeployer.ps1 -InstallerPath "C:\path\to\Setup.exe" -DarbotPassword "secret"
+.\ScoutDeployer.ps1 -InstallerPath "C:\path\to\Setup.exe"
 ```
 
 ### npx (from any directory after npm link / npx path)
@@ -111,12 +103,12 @@ npx scout-deployer --target scout-node.contoso.com --log-dir "C:\Logs\scout"
 | Flag             | PowerShell param        | Default                                   |
 |------------------|------------------------|-------------------------------------------|
 | `--installer`    | `-InstallerPath`        | `%USERPROFILE%\Downloads\MicrosoftScout-Windows-0.22.333-x64-Setup.exe` |
-| `--password`     | `-DarbotPassword`       | prompted                                  |
+| `--password`     | `-TargetPassword`       | prompted when omitted; console output is redacted |
 | `--putty-dir`    | `-PuTTYDir`             | `C:\Program Files\PuTTY`                  |
 | `--log-dir`      | `-LogDir`               | `<script-dir>\Logs\`                      |
-| `--skills`       | `-LocalSkillsRoot`      | `%USERPROFILE%\.copilot\skills`         |
-| `--memory`       | `-LocalMemoryRoot`      | `%USERPROFILE%\.copilot\memory`         |
-| `--sessions`     | `-LocalSessionRoot`     | `%USERPROFILE%\.copilot\session-state`  |
+| `--skills`       | `-LocalSkillsRoot`      | `%USERPROFILE%\.copilot\skills`            |
+| `--memory`       | `-LocalMemoryRoot`      | `%USERPROFILE%\.copilot\memory`            |
+| `--sessions`     | `-LocalSessionRoot`     | `%USERPROFILE%\.copilot\session-state`     |
 | `--connectors`   | `-LocalConnectorsRoot`  | `<script-dir>\connectors\`                |
 | `--mcp`          | `-LocalMcpManifestsRoot`| `<script-dir>\mcp-manifests\`             |
 | `--automations`  | `-LocalAutomationsRoot` | `<script-dir>\automations\`               |
@@ -153,8 +145,7 @@ Two steps are required and both must complete:
    `HKLM\SOFTWARE\Policies\Scout\AllowScoutFrontierAccess = 1`
 
 2. Interactive Frontier sign-in (cannot be automated):
-   The user must launch Scout on the node and sign in as `darbot@contoso.example`
-   through the ClippyClaw app registration (`cb08267c`).
+   The user must launch Scout on the node and sign in with the configured licensed account.
 
 ## Repository layout
 
@@ -172,11 +163,10 @@ scout-deployer\
   automations\            .ps1 / .xml / .cmd automation files
   Logs\                   Generated at runtime — timestamped run logs
   docs\
-    swe-scout-wiki.html   Full Contoso Scout deployment blueprint (source of truth)
-    swe_clippyclaw_app_reg.html  ClippyClaw Entra app registration record
+    swe-scout-wiki.html   Public Scout deployment blueprint template
 ```
 
 ## Source of truth
 
-`docs\swe-scout-wiki.html` — Contoso Scout Deployment Blueprint (captured 2026-06-14)
-Contains: tenant IDs, app registration, fleet node inventory, Intune policy ID, full repo map.
+`docs\swe-scout-wiki.html` is a public deployment-blueprint template.
+Replace its `{{VARIABLE_NAME}}` placeholders with environment-specific values only in private copies.

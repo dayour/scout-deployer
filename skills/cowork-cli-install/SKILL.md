@@ -85,5 +85,5 @@ For Clawpilot/Copilot CLI style sessions:
 
 Known-good validation example:
 - Installed package: `cowork-cli 1.21.22`
-- Executable path example: `%USERPROFILE%\AppData\Roaming\Python\Python314\Scripts\cowork.exe`
+- Executable path example: `%APPDATA%\Python\Python314\Scripts\cowork.exe`
 - Validation: `cowork --version` returns `cowork 1.21.22`.

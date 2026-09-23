@@ -1,23 +1,25 @@
 ---
 name: "3dkg"
-description: "Query and work with the 3DKG knowledge graph, txt2kg APIs, DarbotDB, and QMD MCP memory surface on scout-gateway.contoso.com."
+description: "Query and work with the 3DKG knowledge graph, txt2kg APIs, DarbotDB, and QMD MCP memory surface on a configured host."
 ---
 
 Use this skill whenever the user asks about 3DKG, txt2kg, DarbotDB, QMD MCP, graph memory, graph triples, knowledge graph patterns, or 3DKG workflows.
 
+Set `KNOWLEDGE_GRAPH_HOST` to the deployment hostname before using these endpoint templates.
+
 Primary endpoints:
-- txt2kg UI: http://scout-gateway.contoso.com:3001/#visualize
-- txt2kg triples API: http://scout-gateway.contoso.com:3001/api/graph-db/triples
-- txt2kg graph DB API: http://scout-gateway.contoso.com:3001/api/graph-db?url=http%3A%2F%2Fscout-gateway.contoso.com%3A8529&dbName=txt2kg
-- DarbotDB / ArangoDB: http://scout-gateway.contoso.com:8529
-- DarbotDB query API: http://scout-gateway.contoso.com:8530
-- QMD HTTP MCP: http://scout-gateway.contoso.com:8181/mcp
-- QMD health: http://scout-gateway.contoso.com:8181/health
+- txt2kg UI: `http://<KNOWLEDGE_GRAPH_HOST>:3001/#visualize`
+- txt2kg triples API: `http://<KNOWLEDGE_GRAPH_HOST>:3001/api/graph-db/triples`
+- txt2kg graph DB API: `http://<KNOWLEDGE_GRAPH_HOST>:3001/api/graph-db?url=http%3A%2F%2F<KNOWLEDGE_GRAPH_HOST>%3A8529&dbName=txt2kg`
+- DarbotDB / ArangoDB: `http://<KNOWLEDGE_GRAPH_HOST>:8529`
+- DarbotDB query API: `http://<KNOWLEDGE_GRAPH_HOST>:8530`
+- QMD HTTP MCP: `http://<KNOWLEDGE_GRAPH_HOST>:8181/mcp`
+- QMD health: `http://<KNOWLEDGE_GRAPH_HOST>:8181/health`
 
 QMD MCP details:
 - Server name: qmd
 - Collection: qmd://3dkg-host/
-- Collection root: /home/darbot/qmd-3dkg
+- Collection root: `<QMD_COLLECTION_ROOT>`
 - Tools: query, get, multi_get, status
 - Protocol: POST /mcp with Accept: application/json, text/event-stream. First call initialize, capture response header Mcp-Session-Id, then call tools/list or tools/call with header Mcp-Session-Id.
 
