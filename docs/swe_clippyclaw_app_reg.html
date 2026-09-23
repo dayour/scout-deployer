@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{SCOUT_APP_NAME}} - Entra App Registration ({{SCOUT_TENANT_NAME}})</title>
+<style>
+  :root{
+    /* clippyflow design token: deep dark turquoise -> black gradient + teal accent */
+    --bg:#030709; --bg2:#0b1830; --panel:#0c1526; --panel2:#111d2e; --border:#1d2b42;
+    --text:#e6f4f5; --muted:#8fb3b8; --accent:#2b7fff; --accent2:#2b7fff;
+    --teal:#0b3d8f; --green:#2ea043; --amber:#d29922; --red:#f85149; --code:#040b0d;
+    --grad:linear-gradient(90deg,#0b1830,#0b3d8f,#2b7fff,#0b3d8f,#0b1830);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);
+    background-image:radial-gradient(1200px 600px at 50% -10%,rgba(43,127,255,.30),transparent 60%),linear-gradient(160deg,#0b1830 0%,#06101c 45%,#030709 100%);
+    background-attachment:fixed;
+    font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--accent2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,pre{font-family:"Cascadia Code",Consolas,Menlo,monospace}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+  header.hero{background:linear-gradient(160deg,rgba(11,42,48,.9),rgba(6,20,24,.6));border-bottom:1px solid var(--border);
+    padding:34px 0 30px;margin-bottom:24px}
+  .hero-in{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .hero img{width:140px;height:140px;border-radius:22px;background:transparent;padding:2px;border:0;
+    object-fit:cover;box-shadow:0 8px 38px rgba(33,199,199,.4)}
+  .hero h1{margin:0 0 4px;font-size:30px;letter-spacing:.2px}
+  .hero .sub{color:var(--muted);font-size:15px}
+  .chip{display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;
+    background:var(--panel2);border:1px solid var(--border);color:var(--muted);margin:4px 6px 0 0}
+  .gradbar{height:4px;background:var(--grad);border-radius:4px;margin:14px 0 0}
+  nav.toc{position:sticky;top:0;z-index:5;background:rgba(4,11,13,.92);
+    backdrop-filter:blur(6px);border-bottom:1px solid var(--border);padding:10px 0;margin-bottom:26px}
+  nav.toc .toc-in{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;gap:6px;flex-wrap:wrap}
+  nav.toc a{font-size:13px;color:var(--muted);padding:5px 10px;border-radius:8px}
+  nav.toc a:hover{background:var(--panel2);color:var(--text);text-decoration:none}
+  section{margin:0 0 38px}
+  h2{font-size:22px;margin:0 0 14px;padding-top:10px;border-bottom:1px solid var(--border);padding-bottom:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:#cdd6e0}
+  p{margin:10px 0}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:14px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#cdd6e0;font-weight:600}
+  td code{color:#ffd9a0}
+  .kv td:first-child{color:var(--muted);width:230px;white-space:nowrap}
+  .mono{font-family:"Cascadia Code",Consolas,monospace}
+  .note,.warn,.ok{border-radius:10px;padding:12px 14px;margin:14px 0;border:1px solid}
+  .note{background:rgba(33,199,199,.07);border-color:rgba(33,199,199,.35)}
+  .warn{background:rgba(210,153,34,.08);border-color:rgba(210,153,34,.4)}
+  .ok{background:rgba(46,160,67,.08);border-color:rgba(46,160,67,.4)}
+  .tag{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .tag.n{color:var(--accent2)} .tag.w{color:var(--amber)} .tag.o{color:var(--green)}
+  pre{background:var(--code);border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;overflow:auto;font-size:13px;line-height:1.5}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);
+    border:1px solid var(--border);border-radius:8px;padding:3px 9px;font-size:12.5px;color:#cdd6e0}
+  .ok-dot{width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block}
+  figure{margin:18px 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px;overflow:hidden}
+  figure img{width:100%;display:block;border-radius:8px;border:1px solid var(--border);cursor:zoom-in}
+  figcaption{color:var(--muted);font-size:13px;padding:10px 6px 4px}
+  figcaption b{color:#cdd6e0}
+  /* downloads */
+  .dl-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .dl-tab{cursor:pointer;border:1px solid var(--border);background:var(--panel2);
+    color:var(--muted);padding:7px 14px;border-radius:9px;font-size:13.5px}
+  .dl-tab.active{color:#fff;border-color:var(--accent);background:linear-gradient(180deg,#0b3d8f,#0b1830)}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+  button.act{cursor:pointer;border:none;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:600;color:#fff}
+  .b-dl{background:linear-gradient(90deg,#0b3d8f,#2b7fff);color:#021014}
+  .b-copy{background:var(--panel2);border:1px solid var(--border)!important;color:#cdd6e0}
+  .codewrap{position:relative}
+  .codewrap pre{max-height:460px}
+  .fname{font-size:12px;color:var(--muted);margin-bottom:6px}
+  footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--border);padding-top:18px;margin-top:40px}
+  /* lightbox */
+  #lb{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:50;padding:30px}
+  #lb img{max-width:100%;max-height:100%;border-radius:8px}
+  #lb.open{display:flex}
+  .toctip{color:var(--muted);font-size:12px;margin-left:auto;align-self:center}
+  /* flip cards */
+  .flipgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0}
+  @media(max-width:820px){.flipgrid{grid-template-columns:1fr}}
+  .flip{perspective:1600px}
+  .flip-in{display:grid;width:100%;
+    transition:transform .6s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+  .flip.flipped .flip-in{transform:rotateY(180deg)}
+  .flip-face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+  .flip-back{transform:rotateY(180deg);background:var(--panel2)}
+  .flip-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+    border-radius:8px;background:var(--grad);color:#021014;font-weight:800;font-size:15px;flex:0 0 auto}
+  .flip-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .flip-head h3{margin:0;font-size:16px;color:var(--text)}
+  .flip-shot{width:100%;border-radius:9px;border:1px solid var(--border);cursor:zoom-in;display:block;margin:4px 0 10px}
+  .flip ul{margin:8px 0 0;padding-left:18px}
+  .flip li{margin:5px 0;font-size:13.5px;color:#cdd6e0}
+  .flip-link{font-size:13px;margin:2px 0 8px;word-break:break-all}
+  .flip-btn{margin-top:auto;align-self:flex-start;cursor:pointer;border:1px solid var(--border);
+    background:var(--panel2);color:var(--accent2);padding:7px 13px;border-radius:9px;font-size:12.5px;font-weight:600}
+  .flip-btn:hover{border-color:var(--accent);color:#fff}
+  .flip-back h4{margin:0 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .flip-back pre{margin:6px 0;max-height:none;font-size:12px;line-height:1.45;
+    white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+  .flip-tool{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+  .flip-tool code{color:#ffd9a0}
+  .flip-lg{margin:18px 0}
+  .flip-lg figure{margin:0}
+  .flip-lg .flip-back{justify-content:flex-start}
+  .ac-preview{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+  .ac-title{font-weight:800;font-size:17px;color:var(--text);margin:0 0 3px}
+  .ac-sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+  .ac-step{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--border)}
+  .ac-step:first-of-type{border-top:0}
+  .ac-num{flex:0 0 auto;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-weight:800;color:#021014;background:var(--grad)}
+  .ac-h{font-weight:700;color:var(--text);margin:0 0 2px;font-size:14px}
+  .ac-d{color:var(--muted);font-size:12.5px;margin:0}
+  .ac-action{margin-top:13px}
+  .ac-action a{display:inline-block;background:var(--grad);color:#021014;font-weight:800;padding:9px 16px;border-radius:9px;text-decoration:none;font-size:13px}
+
+
+  /* inverse-debate upgrade: scrollbarless panels + stable 0.4s flipcards */
+  nav.toc,
+  nav.toc .toc-in,
+  section,
+  .panel,
+  .codewrap,
+  .flip-face,
+  pre{
+    overflow-y:auto;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  nav.toc::-webkit-scrollbar,
+  nav.toc .toc-in::-webkit-scrollbar,
+  section::-webkit-scrollbar,
+  .panel::-webkit-scrollbar,
+  .codewrap::-webkit-scrollbar,
+  .flip-face::-webkit-scrollbar,
+  pre::-webkit-scrollbar{display:none}
+  .hero-logo{width:140px;height:140px;border-radius:22px;flex:0 0 auto;filter:drop-shadow(0 8px 38px rgba(43,127,255,.45))}
+  .flipgrid{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));align-items:stretch}
+  .flip{perspective:1600px;cursor:pointer;min-width:0}
+  .flip:focus{outline:2px solid var(--accent);outline-offset:4px;border-radius:14px}
+  .flip-in{height:100%;min-height:360px;transition:transform .4s cubic-bezier(.4,.2,.2,1)}
+  .flip-face{min-height:360px;max-height:520px}
+  .flip-front{justify-content:space-between;background:linear-gradient(160deg,rgba(43,127,255,.14),rgba(12,29,34,.95))}
+  .flip-back{justify-content:flex-start}
+  .flip-num{width:58px;height:58px;border-radius:16px;font-size:30px;box-shadow:0 0 24px rgba(43,127,255,.35);background:linear-gradient(135deg,#2b7fff,#21c7c7);color:#021014}
+  .flip-head{align-items:flex-start}
+  .flip-head h3{font-size:18px;line-height:1.25}
+  .flip-meta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .flip-badge{display:inline-flex;align-items:center;border:1px solid rgba(43,127,255,.45);background:rgba(43,127,255,.13);color:#dbeafe;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;letter-spacing:.2px}
+  .flip-summary{color:var(--muted);font-size:13.5px;margin:10px 0 0}
+  .flip-back pre{max-height:210px;overflow:auto;user-select:text;cursor:text}
+  .flip-hint{color:var(--accent2);font-size:12px;font-weight:800;margin-top:auto;text-transform:uppercase;letter-spacing:.6px}
+
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-in">
+    <div class="panel"><strong>Screenshot omitted from the public template.</strong> Add a sanitized image in a private copy if needed.</div>
+    <div>
+      <h1>{{SCOUT_APP_NAME}} - Entra App Registration</h1>
+      <div class="sub">{{SCOUT_TENANT_NAME}} tenant ({{SCOUT_DOMAIN_ALT}} / {{SCOUT_DOMAIN}}) - public-client desktop app SSO</div>
+      <div class="sub">Part of the Scout architecture - see the <a href="swe-scout-wiki.html">Scout SWE / Architecture Intelligence wiki</a> (identity layer).</div>
+      <div>
+        <span class="chip">Tenant: {{SCOUT_TENANT_NAME}}</span>
+        <span class="chip">Public / native client</span>
+        <span class="chip">Single-tenant</span>
+        <span class="chip">11 Graph delegated scopes</span>
+        <span class="chip">No secret</span>
+      </div>
+      <div class="gradbar"></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="toc-in">
+    <a href="#facts">Facts</a>
+    <a href="#why">Architecture</a>
+    <a href="#prereq">Prerequisites</a>
+    <a href="#run">Run it</a>
+    <a href="#scripts">Scripts</a>
+    <a href="#shots">Screenshots</a>
+    <a href="#cards">Runbook cards</a>
+    <a href="#verify">Verify</a>
+    <a href="#wire">Wire-up</a>
+    <a href="#consent">Admin consent</a>
+    <a href="#trouble">Troubleshooting</a>
+    <a href="#ref">Reference</a>
+    <a href="#deploy-additional">Additional deployment</a>
+    <a href="swe-scout-wiki.html" title="Scout SWE architecture-intelligence wiki">Scout SWE Wiki &#8599;</a>
+    <span class="toctip">Single-file portable wiki - works offline</span>
+  </div>
+</nav>
+
+<div class="wrap">
+<div class="panel"><strong>Public template.</strong> Replace values such as <code>{{SCOUT_TENANT_ID}}</code>, <code>{{SCOUT_APP_CLIENT_ID}}</code>, <code>{{SCOUT_APP_OBJECT_ID}}</code>, <code>{{SCOUT_DOMAIN}}</code>, and node-host placeholders only in a private deployment copy.</div>
+
+<section id="facts">
+  <h2>1. Registration facts</h2>
+  <p>This is the canonical record of the <b>{{SCOUT_APP_NAME}}</b> Entra application registration created in the
+  <b>{{SCOUT_TENANT_NAME}}</b> tenant. {{SCOUT_APP_NAME}} authenticates users with MSAL as a <b>public (native/desktop) client</b> -
+  there is no client secret. The desktop app captures the OAuth authorization code through a custom-protocol
+  deep link (Windows/Linux) or the platform broker (macOS), so the registration only needs public-client
+  redirect URIs - never an <span class="mono">https://localhost</span> web redirect.</p>
+  <div class="panel">
+    <table class="kv">
+      <tr><td>Display name</td><td><b>{{SCOUT_APP_NAME}}</b></td></tr>
+      <tr><td>Application (client) ID</td><td><code>{{SCOUT_APP_CLIENT_ID}}</code></td></tr>
+      <tr><td>Object ID</td><td><code>{{SCOUT_APP_OBJECT_ID}}</code></td></tr>
+      <tr><td>Directory (tenant) ID</td><td><code>{{SCOUT_TENANT_ID}}</code></td></tr>
+      <tr><td>Tenant domain</td><td>{{SCOUT_DOMAIN}} ({{SCOUT_DOMAIN_ALT}})</td></tr>
+      <tr><td>Supported account types</td><td>My organization only (<span class="mono">AzureADMyOrg</span>)</td></tr>
+      <tr><td>Client type</td><td>Public client / native - <span class="mono">isFallbackPublicClient = true</span>, no secret</td></tr>
+      <tr><td>State</td><td><span class="pill"><span class="ok-dot"></span> Activated</span></td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="why">
+  <h2>2. Architecture - why it is shaped this way</h2>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Public client, no secret</h3>
+      <p>A desktop app cannot keep a secret confidential. {{SCOUT_APP_NAME}} uses MSAL public-client flows
+      (interactive + device code + silent refresh). The registration sets
+      <span class="mono">isFallbackPublicClient = true</span> ("Allow public client flows") and ships
+      <b>zero</b> credentials.</p>
+    </div>
+    <div class="panel">
+      <h3>Deep-link redirect, not localhost</h3>
+      <p>Instead of an <span class="mono">http(s)://localhost</span> loopback, the app registers the
+      custom scheme <span class="mono">ms-clawpilot://</span>. Azure AD redirects to
+      <span class="mono">ms-clawpilot://auth/callback</span>; Electron intercepts it via
+      <span class="mono">open-url</span> (macOS) or <span class="mono">second-instance</span> (Windows/Linux).
+      This satisfies SPACE/compliance (no localhost web reply URL).</p>
+    </div>
+    <div class="panel">
+      <h3>macOS broker URIs</h3>
+      <p>On macOS the MSAL native broker uses <span class="mono">msauth.&lt;bundleId&gt;://auth</span>.
+      The signed build uses <span class="mono">msauth.com.microsoft.clawpilot://auth</span>; unsigned/dev
+      builds fall back to the shared <span class="mono">msauth.com.msauth.unsignedapp://auth</span>.</p>
+    </div>
+    <div class="panel">
+      <h3>Delegated Graph scopes</h3>
+      <p>Scopes are derived from <span class="mono">BASE_SCOPES + FEATURE_SCOPES</span> in
+      <span class="mono">electron/auth/msal-provider.ts</span>: mail, calendar, files, Teams chat, and people,
+      on top of the OIDC base. All <b>delegated</b> (acting as the signed-in user), never application
+      permissions.</p>
+    </div>
+  </div>
+  <div class="note"><span class="tag n">Source of truth</span> &nbsp;The redirect URIs and scopes are mirrored
+  from <span class="mono">electron/auth/deep-link-loopback.ts</span>,
+  <span class="mono">electron/auth/msal-provider.ts</span>, and
+  <span class="mono">electron-builder.json5</span>. Keep them in sync with the codebase.</div>
+</section>
+
+<section id="prereq">
+  <h2>3. Prerequisites</h2>
+  <ul>
+    <li><b>Azure CLI</b> (<span class="mono">az</span>) on PATH.</li>
+    <li>An account with rights to create app registrations in the {{SCOUT_TENANT_NAME}} tenant
+        (here: <span class="mono">{{SCOUT_LICENSED_USER}}</span>).</li>
+    <li>For the bash variant: <span class="mono">jq</span>.</li>
+    <li>Sign in to the <b>target tenant</b> first (device code avoids the
+        <span class="mono">--username</span> incompatibility):</li>
+  </ul>
+  <pre>az login --use-device-code --allow-no-subscriptions
+# Complete the code at https://microsoft.com/device as {{SCOUT_LICENSED_USER}}
+az account set --subscription "&lt;a-subscription-in-the-{{SCOUT_TENANT_NAME}}-tenant&gt;"
+az account show --query "{tenant:tenantId,user:user.name}" -o json</pre>
+  <div class="warn"><span class="tag w">Gotcha</span> &nbsp;<span class="mono">az login --use-device-code</span>
+  cannot be combined with <span class="mono">--username</span> ("not applicable with other arguments").
+  Run device code bare and pick the account in the browser.</div>
+</section>
+
+<section id="run">
+  <h2>4. Run it</h2>
+  <p>Save the PowerShell script (next section) and run it. It is idempotent - it finds the app by display
+  name and updates in place, otherwise creates it.</p>
+  <pre>.\New-{{SCOUT_APP_NAME}}AppRegistration.ps1
+# Optionally grant tenant-wide admin consent (needs Privileged Role / Global Admin):
+.\New-{{SCOUT_APP_NAME}}AppRegistration.ps1 -GrantAdminConsent</pre>
+  <div class="ok"><span class="tag o">Result</span> &nbsp;Prints the ClientId, ObjectId, tenant, audience,
+  and the public-client redirect URIs, plus the exact two lines to paste into
+  <span class="mono">corp-account-probe.ts</span>.</div>
+</section>
+
+<section id="scripts">
+  <h2>5. Script templates</h2>
+  <p>Keep automation scripts as separate reviewed source files. Before running them, supply <code>{{SCOUT_TENANT_ID}}</code>, <code>{{SCOUT_APP_NAME}}</code>, and the required redirect URI and permission settings through parameters or environment variables.</p>
+  <div class="note"><span class="tag n">Public template</span> Embedded executable payloads are intentionally excluded so encoded tenant values cannot bypass repository scans.</div>
+</section>
+
+<section id="shots">
+  <h2>6. What it looks like when complete</h2>
+  <p>Captured live from the Microsoft Entra admin center, signed in as
+  <span class="mono">{{SCOUT_LICENSED_USER}}</span> under the <b>{{SCOUT_TENANT_NAME}} ({{SCOUT_DOMAIN}})</b> tenant.</p>
+
+  <div class="flip flip-lg" id="shot-overview">
+    <div class="flip-in">
+      <div class="flip-face flip-front">
+        <figure>
+          <div class="panel"><strong>Screenshot omitted from the public template.</strong> Add a sanitized image in a private copy if needed.</div>
+          <figcaption><b>Overview.</b> Client ID, Object ID, tenant, "0 web, 0 spa, 3 public client" redirect URIs,
+          "My organization only", State = Activated.</figcaption>
+        </figure>
+        <button class="flip-btn" onclick="flipCard(this)">Show automation step + schema</button>
+      </div>
+      <div class="flip-face flip-back">
+        <p class="flip-tool">Tool: <code>browser_navigate</code> then <code>browser_take_screenshot</code> (content viewport only, no URL bar / OS chrome).</p>
+        <pre>{
+  "schema": "clippyclaw.flipcard/v1",
+  "view": "overview",
+  "browser": "copilotbrowser",
+  "privacy": "content-viewport screenshot only; no URL bar, no OS chrome",
+  "screenshot": "01-overview.png",
+  "steps": [
+    { "tool": "browser_navigate",
+      "args": { "url": "https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/{{SCOUT_APP_CLIENT_ID}}" } },
+    { "tool": "browser_take_screenshot",
+      "args": { "type": "png", "filename": "01-overview.png" } }
+  ]
+}</pre>
+        <button class="flip-btn" onclick="flipCard(this)">Back to screenshot</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip flip-lg" id="shot-auth">
+    <div class="flip-in">
+      <div class="flip-face flip-front">
+        <figure>
+          <div class="panel"><strong>Screenshot omitted from the public template.</strong> Add a sanitized image in a private copy if needed.</div>
+          <figcaption><b>Authentication.</b> All three public-client redirect URIs:
+          <span class="mono">ms-clawpilot://auth/callback</span>,
+          <span class="mono">msauth.com.microsoft.clawpilot://auth</span>,
+          <span class="mono">msauth.com.msauth.unsignedapp://auth</span>.</figcaption>
+        </figure>
+        <button class="flip-btn" onclick="flipCard(this)">Show automation step + schema</button>
+      </div>
+      <div class="flip-face flip-back">
+        <p class="flip-tool">Tool: <code>browser_click</code> (Authentication rail) then <code>browser_take_screenshot</code>.</p>
+        <pre>{
+  "schema": "clippyclaw.flipcard/v1",
+  "view": "authentication",
+  "browser": "copilotbrowser",
+  "privacy": "content-viewport screenshot only; no URL bar, no OS chrome",
+  "screenshot": "02-authentication.png",
+  "steps": [
+    { "tool": "browser_click",
+      "args": { "element": "Authentication rail link", "ref": "link:Authentication" } },
+    { "tool": "browser_take_screenshot",
+      "args": { "type": "png", "filename": "02-authentication.png" } }
+  ]
+}</pre>
+        <button class="flip-btn" onclick="flipCard(this)">Back to screenshot</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip flip-lg" id="shot-perms">
+    <div class="flip-in">
+      <div class="flip-face flip-front">
+        <figure>
+          <div class="panel"><strong>Screenshot omitted from the public template.</strong> Add a sanitized image in a private copy if needed.</div>
+          <figcaption><b>API permissions.</b> Microsoft Graph (11) delegated permissions, status
+          "Granted for {{SCOUT_TENANT_NAME}}".</figcaption>
+        </figure>
+        <button class="flip-btn" onclick="flipCard(this)">Show automation step + schema</button>
+      </div>
+      <div class="flip-face flip-back">
+        <p class="flip-tool">Tool: <code>browser_click</code> (API permissions rail) then <code>browser_take_screenshot</code>.</p>
+        <pre>{
+  "schema": "clippyclaw.flipcard/v1",
+  "view": "api-permissions",
+  "browser": "copilotbrowser",
+  "privacy": "content-viewport screenshot only; no URL bar, no OS chrome",
+  "screenshot": "03-api-permissions.png",
+  "steps": [
+    { "tool": "browser_click",
+      "args": { "element": "API permissions rail link", "ref": "link:API permissions" } },
+    { "tool": "browser_take_screenshot",
+      "args": { "type": "png", "filename": "03-api-permissions.png" } }
+  ]
+}</pre>
+        <button class="flip-btn" onclick="flipCard(this)">Back to screenshot</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip flip-lg" id="shot-permsfull">
+    <div class="flip-in">
+      <div class="flip-face flip-front">
+        <figure>
+          <div class="panel"><strong>Screenshot omitted from the public template.</strong> Add a sanitized image in a private copy if needed.</div>
+          <figcaption><b>API permissions (full list).</b> Calendars.ReadWrite, Chat.ReadWrite, Files.ReadWrite,
+          Mail.ReadWrite, Mail.Send, offline_access, openid, People.Read, profile, User.Read,
+          User.ReadBasic.All.</figcaption>
+        </figure>
+        <button class="flip-btn" onclick="flipCard(this)">Show automation step + schema</button>
+      </div>
+      <div class="flip-face flip-back">
+        <p class="flip-tool">Tool: <code>browser_scroll</code> (deltaY to reveal full list) then <code>browser_take_screenshot</code>.</p>
+        <pre>{
+  "schema": "clippyclaw.flipcard/v1",
+  "view": "api-permissions-full",
+  "browser": "copilotbrowser",
+  "privacy": "content-viewport screenshot only; no URL bar, no OS chrome",
+  "screenshot": "04-api-permissions-full.png",
+  "steps": [
+    { "tool": "browser_scroll",
+      "args": { "deltaX": 0, "deltaY": 600 } },
+    { "tool": "browser_take_screenshot",
+      "args": { "type": "png", "filename": "04-api-permissions-full.png", "fullPage": true } }
+  ]
+}</pre>
+        <button class="flip-btn" onclick="flipCard(this)">Back to screenshot</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip flip-lg" id="shot-branding">
+    <div class="flip-in">
+      <div class="flip-face flip-front">
+        <figure>
+          <div class="panel"><strong>Screenshot omitted from the public template.</strong> Add a sanitized image in a private copy if needed.</div>
+          <figcaption><b>Branding &amp; properties.</b> The {{SCOUT_APP_NAME}} mascot set as the application Logo, with
+          publisher domain <span class="mono">{{SCOUT_DOMAIN}}</span>.</figcaption>
+        </figure>
+        <button class="flip-btn" onclick="flipCard(this)">Show automation step + schema</button>
+      </div>
+      <div class="flip-face flip-back">
+        <p class="flip-tool">Tool: <code>browser_click</code> (Branding &amp; properties rail) then <code>browser_take_screenshot</code>.</p>
+        <pre>{
+  "schema": "clippyclaw.flipcard/v1",
+  "view": "branding",
+  "browser": "copilotbrowser",
+  "privacy": "content-viewport screenshot only; no URL bar, no OS chrome",
+  "screenshot": "05-branding.png",
+  "steps": [
+    { "tool": "browser_click",
+      "args": { "element": "Branding & properties rail link", "ref": "link:Branding & properties" } },
+    { "tool": "browser_take_screenshot",
+      "args": { "type": "png", "filename": "05-branding.png" } }
+  ]
+}</pre>
+        <button class="flip-btn" onclick="flipCard(this)">Back to screenshot</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><span class="tag n">Portal caching</span> &nbsp;The small icon in the blade
+  breadcrumb caches aggressively and can lag several minutes behind the uploaded logo. The
+  <b>Branding &amp; properties</b> Logo field (above) is the authoritative view.</div>
+</section>
+
+<section id="cards">
+  <h2>7. Runbook cards (flip for automation)</h2>
+  <p>Each runbook step is now a click-to-flip card. The front gives the nitrous step number, name, duration, and complexity; the back gives the exact action, command, and expected output.</p>
+  <div class="flipgrid">
+    <div class="flip" id="runbook-card-1" role="button" tabindex="0" aria-label="Flip Sign in to the {{SCOUT_TENANT_NAME}} tenant" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">1</span><h3>Sign in to the {{SCOUT_TENANT_NAME}} tenant</h3></div>
+            <div class="flip-meta"><span class="flip-badge">2 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Authenticate Azure CLI in the target tenant with device-code flow before creating or changing the registration.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 1 &mdash; detailed runbook</h4>
+          <p>Authenticate Azure CLI in the target tenant with device-code flow before creating or changing the registration.</p>
+          <pre>az login --tenant {{SCOUT_TENANT_ID}} --use-device-code
+az account show --query "{tenantId:tenantId,user:user.name}" -o json</pre>
+          <h4>Expected output</h4>
+          <pre>{
+  "tenantId": "{{SCOUT_TENANT_ID}}",
+  "user": "{{SCOUT_LICENSED_USER}}"
+}</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="runbook-card-2" role="button" tabindex="0" aria-label="Flip Create or locate {{SCOUT_APP_NAME}}" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">2</span><h3>Create or locate {{SCOUT_APP_NAME}}</h3></div>
+            <div class="flip-meta"><span class="flip-badge">3 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Run the idempotent script; it finds {{SCOUT_APP_NAME}} by display name or creates the single-tenant public-client app.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 2 &mdash; detailed runbook</h4>
+          <p>Run the idempotent script; it finds {{SCOUT_APP_NAME}} by display name or creates the single-tenant public-client app.</p>
+          <pre>.\New-{{SCOUT_APP_NAME}}AppRegistration.ps1</pre>
+          <h4>Expected output</h4>
+          <pre>DisplayName : {{SCOUT_APP_NAME}}
+ClientId    : {{SCOUT_APP_CLIENT_ID}}
+ObjectId    : {{SCOUT_APP_OBJECT_ID}}</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="runbook-card-3" role="button" tabindex="0" aria-label="Flip Configure public-client redirects" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">3</span><h3>Configure public-client redirects</h3></div>
+            <div class="flip-meta"><span class="flip-badge">4 min</span><span class="flip-badge">Medium</span></div>
+            <p class="flip-summary">Set the custom protocol and MSAL broker redirect URIs used by desktop builds.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 3 &mdash; detailed runbook</h4>
+          <p>Set the custom protocol and MSAL broker redirect URIs used by desktop builds.</p>
+          <pre>az ad app update --id {{SCOUT_APP_CLIENT_ID}} --public-client-redirect-uris ms-clawpilot://auth/callback msauth.com.microsoft.clawpilot://auth msauth.com.msauth.unsignedapp://auth</pre>
+          <h4>Expected output</h4>
+          <pre>publicClient.redirectUris contains all three native redirect URIs; no localhost web redirect is added.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="runbook-card-4" role="button" tabindex="0" aria-label="Flip Enable fallback public client" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">4</span><h3>Enable fallback public client</h3></div>
+            <div class="flip-meta"><span class="flip-badge">1 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Allow native public-client flows so {{SCOUT_APP_NAME}} can sign in without a client secret.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 4 &mdash; detailed runbook</h4>
+          <p>Allow native public-client flows so {{SCOUT_APP_NAME}} can sign in without a client secret.</p>
+          <pre>az rest --method PATCH --uri https://graph.microsoft.com/v1.0/applications/{{SCOUT_APP_OBJECT_ID}} --body "{"isFallbackPublicClient":true}"</pre>
+          <h4>Expected output</h4>
+          <pre>isFallbackPublicClient: true</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="runbook-card-5" role="button" tabindex="0" aria-label="Flip Apply delegated Graph scopes" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">5</span><h3>Apply delegated Graph scopes</h3></div>
+            <div class="flip-meta"><span class="flip-badge">5 min</span><span class="flip-badge">Medium</span></div>
+            <p class="flip-summary">Grant the eleven delegated Microsoft Graph scopes required by mail, calendar, files, Teams chat, people, and OIDC sign-in.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 5 &mdash; detailed runbook</h4>
+          <p>Grant the eleven delegated Microsoft Graph scopes required by mail, calendar, files, Teams chat, people, and OIDC sign-in.</p>
+          <pre>az ad app show --id {{SCOUT_APP_CLIENT_ID}} --query "requiredResourceAccess[?resourceAppId=='00000003-0000-0000-c000-000000000000']" -o json</pre>
+          <h4>Expected output</h4>
+          <pre>The Graph resource block lists 11 delegated scope IDs.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="runbook-card-6" role="button" tabindex="0" aria-label="Flip Brand the app registration" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">6</span><h3>Brand the app registration</h3></div>
+            <div class="flip-meta"><span class="flip-badge">3 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Open Branding &amp; properties, upload the {{SCOUT_APP_NAME}} mark, set the publisher domain, and save.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 6 &mdash; detailed runbook</h4>
+          <p>Open Branding &amp; properties, upload the {{SCOUT_APP_NAME}} mark, set the publisher domain, and save.</p>
+          <pre>Start-Process "https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Branding/appId/{{SCOUT_APP_CLIENT_ID}}"</pre>
+          <h4>Expected output</h4>
+          <pre>Branding page shows the {{SCOUT_APP_NAME}} logo and {{SCOUT_DOMAIN}} publisher domain.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="runbook-card-7" role="button" tabindex="0" aria-label="Flip Grant admin consent when required" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">7</span><h3>Grant admin consent when required</h3></div>
+            <div class="flip-meta"><span class="flip-badge">2 min</span><span class="flip-badge">Privileged</span></div>
+            <p class="flip-summary">If tenant-wide consent is required, rerun the script with the admin-consent switch using a privileged account.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 7 &mdash; detailed runbook</h4>
+          <p>If tenant-wide consent is required, rerun the script with the admin-consent switch using a privileged account.</p>
+          <pre>.\New-{{SCOUT_APP_NAME}}AppRegistration.ps1 -GrantAdminConsent</pre>
+          <h4>Expected output</h4>
+          <pre>Admin consent grant succeeds or reports that consent was already present.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="runbook-card-8" role="button" tabindex="0" aria-label="Flip Record client constants" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">8</span><h3>Record client constants</h3></div>
+            <div class="flip-meta"><span class="flip-badge">2 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Copy the generated ClientId, TenantId, and Authority into the desktop app configuration.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 8 &mdash; detailed runbook</h4>
+          <p>Copy the generated ClientId, TenantId, and Authority into the desktop app configuration.</p>
+          <pre>Write-Output "CLIENT_ID={{SCOUT_APP_CLIENT_ID}}"
+Write-Output "TENANT_ID={{SCOUT_TENANT_ID}}"</pre>
+          <h4>Expected output</h4>
+          <pre>The values match the registration facts table and the app uses the {{SCOUT_TENANT_NAME}} authority.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="verify">
+  <h2>8. Verify</h2>
+  <p>Use these flipcards after any registration change to verify the tenant object, permission count, and public-client posture.</p>
+  <div class="flipgrid">
+    <div class="flip" id="verify-card-1" role="button" tabindex="0" aria-label="Flip Verify registration shape" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">1</span><h3>Verify registration shape</h3></div>
+            <div class="flip-meta"><span class="flip-badge">1 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Confirm display name, audience, fallback public-client setting, and native redirect URIs.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 1 &mdash; detailed runbook</h4>
+          <p>Confirm display name, audience, fallback public-client setting, and native redirect URIs.</p>
+          <pre>az ad app show --id {{SCOUT_APP_CLIENT_ID}} --query "{name:displayName, audience:signInAudience, fallback:isFallbackPublicClient, redirects:publicClient.redirectUris}" -o json</pre>
+          <h4>Expected output</h4>
+          <pre>{
+  "name": "{{SCOUT_APP_NAME}}",
+  "audience": "AzureADMyOrg",
+  "fallback": true,
+  "redirects": ["ms-clawpilot://auth/callback", "msauth.com.microsoft.clawpilot://auth", "msauth.com.msauth.unsignedapp://auth"]
+}</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="verify-card-2" role="button" tabindex="0" aria-label="Flip Count Graph delegated scopes" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">2</span><h3>Count Graph delegated scopes</h3></div>
+            <div class="flip-meta"><span class="flip-badge">1 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Count Microsoft Graph delegated permissions; the app should carry eleven scope entries.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 2 &mdash; detailed runbook</h4>
+          <p>Count Microsoft Graph delegated permissions; the app should carry eleven scope entries.</p>
+          <pre>az ad app show --id {{SCOUT_APP_CLIENT_ID}} --query "length(requiredResourceAccess[?resourceAppId=='00000003-0000-0000-c000-000000000000'].resourceAccess[])"</pre>
+          <h4>Expected output</h4>
+          <pre>11</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="verify-card-3" role="button" tabindex="0" aria-label="Flip Check no secret dependency" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">3</span><h3>Check no secret dependency</h3></div>
+            <div class="flip-meta"><span class="flip-badge">1 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Confirm the desktop app is a public client and does not require a stored client secret.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 3 &mdash; detailed runbook</h4>
+          <p>Confirm the desktop app is a public client and does not require a stored client secret.</p>
+          <pre>az ad app credential list --id {{SCOUT_APP_CLIENT_ID}} -o table</pre>
+          <h4>Expected output</h4>
+          <pre>No password credentials are required for {{SCOUT_APP_NAME}} desktop sign-in.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="wire">
+  <h2>9. Wire it into {{SCOUT_APP_NAME}}</h2>
+  <p>Point the desktop app at this registration and keep runtime scopes synchronized with the Entra app permissions.</p>
+  <div class="flipgrid">
+    <div class="flip" id="wire-card-1" role="button" tabindex="0" aria-label="Flip Set auth constants" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">1</span><h3>Set auth constants</h3></div>
+            <div class="flip-meta"><span class="flip-badge">2 min</span><span class="flip-badge">Easy</span></div>
+            <p class="flip-summary">Update the {{SCOUT_APP_NAME}} auth probe constants to point at the {{SCOUT_TENANT_NAME}} tenant registration.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 1 &mdash; detailed runbook</h4>
+          <p>Update the {{SCOUT_APP_NAME}} auth probe constants to point at the {{SCOUT_TENANT_NAME}} tenant registration.</p>
+          <pre>export const CLIENT_ID = "{{SCOUT_APP_CLIENT_ID}}";
+export const TENANT_ID = "{{SCOUT_TENANT_ID}}";
+export const AUTHORITY = `https://login.microsoftonline.com/${TENANT_ID}`;</pre>
+          <h4>Expected output</h4>
+          <pre>corp-account-probe.ts references the same ClientId and TenantId shown in this wiki.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="wire-card-2" role="button" tabindex="0" aria-label="Flip Validate scope alignment" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">2</span><h3>Validate scope alignment</h3></div>
+            <div class="flip-meta"><span class="flip-badge">2 min</span><span class="flip-badge">Medium</span></div>
+            <p class="flip-summary">Make sure BASE_SCOPES and FEATURE_SCOPES stay aligned with the app registration delegated permissions.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 2 &mdash; detailed runbook</h4>
+          <p>Make sure BASE_SCOPES and FEATURE_SCOPES stay aligned with the app registration delegated permissions.</p>
+          <pre>Select-String -Path electron\auth\msal-provider.ts -Pattern "BASE_SCOPES|FEATURE_SCOPES" -Context 0,8</pre>
+          <h4>Expected output</h4>
+          <pre>Every requested runtime scope exists in the Graph delegated permissions list.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip" id="wire-card-3" role="button" tabindex="0" aria-label="Flip Smoke-test sign-in" onclick="flipCard(this)" onkeydown="flipCardKey(event,this)">
+      <div class="flip-in">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-head"><span class="flip-num">3</span><h3>Smoke-test sign-in</h3></div>
+            <div class="flip-meta"><span class="flip-badge">5 min</span><span class="flip-badge">Medium</span></div>
+            <p class="flip-summary">Launch {{SCOUT_APP_NAME}} and complete an interactive or device-code sign-in against the configured authority.</p>
+          </div>
+          <div class="flip-hint">Click to flip</div>
+        </div>
+        <div class="flip-face flip-back">
+          <h4>Step 3 &mdash; detailed runbook</h4>
+          <p>Launch {{SCOUT_APP_NAME}} and complete an interactive or device-code sign-in against the configured authority.</p>
+          <pre>npm run start
+# or run the packaged desktop build and trigger Sign in</pre>
+          <h4>Expected output</h4>
+          <pre>A {{SCOUT_TENANT_NAME}} home account signs in; token cache contains the configured tenant and client ID.</pre>
+          <div class="flip-hint">Click to return</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="warn"><span class="tag w">Heads up</span> &nbsp;<span class="mono">isCorpHomeAccount()</span>
+  in <span class="mono">electron/auth/corp-account-probe.ts</span> filters accounts to the configured <span class="mono">TENANT_ID</span> home realm. Changing
+  the tenant changes which accounts are accepted as "home" accounts.</div>
+</section>
+
+<section id="consent">
+  <h2>10. Admin consent</h2>
+  <p>The screenshots show "Granted for {{SCOUT_TENANT_NAME}}" - admin consent is in place. To (re)grant after changing
+  scopes:</p>
+  <pre>az ad app permission admin-consent --id {{SCOUT_APP_CLIENT_ID}}</pre>
+  <p>or in the portal: <b>API permissions &gt; Grant admin consent for {{SCOUT_TENANT_NAME}}</b>. Requires Privileged
+  Role Administrator or Global Administrator.</p>
+</section>
+
+<section id="trouble">
+  <h2>11. Troubleshooting</h2>
+  <table>
+    <tr><th>Symptom</th><th>Cause &amp; fix</th></tr>
+    <tr><td>Scopes show 0 after running update</td>
+        <td><span class="mono">az ad app update --required-resource-accesses</span> silently no-ops on
+        update. The scripts here apply permissions with an explicit
+        <span class="mono">az rest PATCH</span> to <span class="mono">/applications/{objectId}</span>.</td></tr>
+    <tr><td><span class="mono">--use-device-code is not applicable with other arguments</span></td>
+        <td>Drop <span class="mono">--username</span>; run device code bare and choose the account in the browser.</td></tr>
+    <tr><td><span class="mono">AADSTS70016 authorization pending</span> then expiry</td>
+        <td>The device code was not entered in time. Start a fresh <span class="mono">az login --use-device-code</span> and enter the new code promptly.</td></tr>
+    <tr><td>Breadcrumb icon still shows the old/generic logo</td>
+        <td>Entra portal CDN cache. The Branding Logo field is authoritative; the header updates within minutes.</td></tr>
+    <tr><td>Logo upload rejected</td>
+        <td>Use a square PNG/JPEG under ~256 KB. The helper pads the mascot to 1024x1024 before
+        <span class="mono">PUT /applications/{objectId}/logo</span>.</td></tr>
+    <tr><td>WAM fails on RDP / DevBox / non-AAD-joined</td>
+        <td>Expected - WAM is a Windows-only silent path; MSAL fallback handles it. Not a bug.</td></tr>
+  </table>
+</section>
+
+<section id="deploy-additional">
+  <h2>12. Additional deployment - rolling to another {{SCOUT_TENANT_NAME}} host</h2>
+  <p>The {{SCOUT_APP_NAME}} registration is <b>tenant-wide</b>. You do <b>not</b> create a new app per machine - every
+  additional {{SCOUT_TENANT_NAME}} node reuses the same public client <code>{{SCOUT_APP_CLIENT_ID}}</code> in
+  tenant <code>{{SCOUT_TENANT_ID}}</code>. A new host only needs (a) the Scout Frontier policy key
+  and (b) an interactive / device-code MSAL sign-in through this registration. The steps below are the manual
+  runbook we follow per host.</p>
+
+  <h3>Per-host steps</h3>
+  <ol>
+    <li><b>SSH in &amp; identify the box</b> - confirm OS and whether Microsoft Scout / {{SCOUT_APP_NAME}} is installed and its version.
+      <pre>ssh &lt;host&gt;        # e.g. ssh framer  ({{SCOUT_TENANT_NAME}} fleet hosts are in ~/.ssh/config)
+# Windows:  Get-ItemProperty "HKLM:\SOFTWARE\Policies\Scout" -EA SilentlyContinue
+# Linux:    cat /etc/clawpilot/policy.json 2>/dev/null
+# macOS:    defaults read /Library/Managed\ Preferences/com.microsoft.clawpilot 2>/dev/null</pre></li>
+
+    <li><b>Set the Frontier policy key</b> (clears the "not set up for your organization" gate). Use the source for the OS:
+      <table>
+        <tr><th>Platform</th><th>Policy source</th><th>Key</th></tr>
+        <tr><td>Windows</td><td><code>HKLM\SOFTWARE\Policies\Scout</code></td><td><code>AllowScoutFrontierAccess = 1</code> (DWORD, PascalCase)</td></tr>
+        <tr><td>macOS</td><td><code>/Library/Managed Preferences/com.microsoft.clawpilot.plist</code></td><td>PascalCase</td></tr>
+        <tr><td>Linux</td><td><code>/etc/clawpilot/policy.json</code></td><td><code>{ "version":1, "allowScoutFrontierAccess": true }</code> (camelCase)</td></tr>
+        <tr><td>No-root fallback</td><td><code>&lt;userData&gt;/tenant-policy.json</code></td><td>camelCase</td></tr>
+      </table></li>
+
+    <li><b>Sign in through this registration</b> - public client, no secret. Interactive (deep link) on a desktop session,
+      or device code on a headless box:
+      <pre>az login --use-device-code --allow-no-subscriptions
+# Complete at https://microsoft.com/device as {{SCOUT_LICENSED_USER}} ({{SCOUT_TENANT_NAME}})
+# App/runtime sign-in uses client {{SCOUT_APP_CLIENT_ID}}
+# Redirect (Win/Linux): ms-clawpilot://auth/callback
+# Delegated scopes: openid profile email offline_access User.Read
+#                   Mail.ReadWrite Mail.Send Calendars.ReadWrite Files.ReadWrite Chat.ReadWrite People.Read</pre></li>
+
+    <li><b>Relaunch Scout / {{SCOUT_APP_NAME}}</b> on the host - it reads the policy key at startup (and ~every 15 min). The
+      waitlist screen clears and the account/profile menu should show <code>{{SCOUT_LICENSED_USER}} ({{SCOUT_TENANT_NAME}})</code>.</li>
+
+    <li><b>Verify</b> - see sections <a href="#verify">8. Verify</a> and <a href="#cards">7. Runbook cards</a>. Confirm the
+      M365 Copilot license is present (satisfies Frontier) and the GitHub Copilot seat is signed in.</li>
+  </ol>
+
+  <p class="note">Admin consent is already granted tenant-wide (see <a href="#consent">10. Admin consent</a>), so no
+  per-user consent prompt is expected. For the broader control-plane wiring (scout-api / scloud-om / sdk / cli) on a
+  node, see the <a href="swe-scout-wiki.html#deploy">Scout SWE wiki - {{SCOUT_TENANT_NAME}} deployment</a>.</p>
+</section>
+
+<section id="ref">
+  <h2>13. Reference</h2>
+  <h3>Redirect URIs (public client)</h3>
+  <table>
+    <tr><th>URI</th><th>Platform</th><th>Source constant</th></tr>
+    <tr><td><code>ms-clawpilot://auth/callback</code></td><td>Windows / Linux deep link</td>
+        <td><span class="mono">DEEP_LINK_REDIRECT_URI</span></td></tr>
+    <tr><td><code>msauth.com.microsoft.clawpilot://auth</code></td><td>macOS broker (signed)</td>
+        <td><span class="mono">MACOS_BROKER_REDIRECT_URI_SIGNED</span></td></tr>
+    <tr><td><code>msauth.com.msauth.unsignedapp://auth</code></td><td>macOS broker (unsigned/dev)</td>
+        <td><span class="mono">MACOS_BROKER_REDIRECT_URI_UNSIGNED</span></td></tr>
+  </table>
+
+  <h3>Delegated Microsoft Graph scopes (resource <code>00000003-0000-0000-c000-000000000000</code>)</h3>
+  <table>
+    <tr><th>Scope</th><th>Delegated permission ID (constant across tenants)</th></tr>
+    <tr><td><code>User.Read</code></td><td><span class="mono">e1fe6dd8-ba31-4d61-89e7-88639da4683d</span></td></tr>
+    <tr><td><code>User.ReadBasic.All</code></td><td><span class="mono">b340eb25-3456-403f-be2f-af7a0d370277</span></td></tr>
+    <tr><td><code>Mail.ReadWrite</code></td><td><span class="mono">024d486e-b451-40bb-833d-3e66d98c5c73</span></td></tr>
+    <tr><td><code>Mail.Send</code></td><td><span class="mono">e383f46e-2787-4529-855e-0e479a3ffac0</span></td></tr>
+    <tr><td><code>Calendars.ReadWrite</code></td><td><span class="mono">1ec239c2-d7c9-4623-a91a-a9775856bb36</span></td></tr>
+    <tr><td><code>Files.ReadWrite</code></td><td><span class="mono">5c28f0bf-8a70-41f1-8ab2-9032436ddb65</span></td></tr>
+    <tr><td><code>Chat.ReadWrite</code></td><td><span class="mono">9ff7295e-131b-4d94-90e1-69fde507ac11</span></td></tr>
+    <tr><td><code>People.Read</code></td><td><span class="mono">ba47897c-39ec-4d83-8086-ee8256fa737d</span></td></tr>
+    <tr><td><code>offline_access</code></td><td><span class="mono">7427e0e9-2fba-42fe-b0c0-848c9e6a8182</span></td></tr>
+    <tr><td><code>openid</code></td><td><span class="mono">37f7f235-527c-4136-accd-4a02d197296e</span></td></tr>
+    <tr><td><code>profile</code></td><td><span class="mono">14dad69e-099b-42c9-810b-d002981feec1</span></td></tr>
+  </table>
+
+  <h3>Set the mascot logo (Graph)</h3>
+  <pre>$token = az account get-access-token --resource https://graph.microsoft.com --query accessToken -o tsv
+Invoke-RestMethod -Method Put `
+  -Uri "https://graph.microsoft.com/v1.0/applications/{{SCOUT_APP_OBJECT_ID}}/logo" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "image/png" -Body ([IO.File]::ReadAllBytes("clippyclaw-mascot-square.png"))</pre>
+</section>
+
+<footer>
+  {{SCOUT_APP_NAME}} Entra app registration wiki - generated for the {{SCOUT_TENANT_NAME}} ({{SCOUT_DOMAIN_ALT}}) tenant.
+  Self-contained, offline-portable. Values reflect the live registration
+  <span class="mono">{{SCOUT_APP_CLIENT_ID}}</span>.
+</footer>
+</div>
+
+<div id="lb" onclick="this.classList.remove('open')"><img id="lbimg" alt=""></div>
+
+<script>
+  function zoom(img){ var lb=document.getElementById("lb"); document.getElementById("lbimg").src=img.src; lb.classList.add("open"); }
+  function flipCard(b){ const card = b.classList && b.classList.contains("flip") ? b : b.closest(".flip"); if(card) card.classList.toggle("flipped"); }
+  function flipCardKey(e,b){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); flipCard(b); } }
+  function keepCodeClick(e){ if(e.target.closest(".flip-back pre")){ e.stopPropagation(); } }
+  document.addEventListener("click", keepCodeClick, true);
+</script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SWE Scout Wiki - Architecture Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#06070d; --bg2:#0c0e18; --panel:#10131f; --panel2:#151a2b;
+  --ink:#e8ecf6; --muted:#9aa3bd; --line:#222a40;
+  --blue:#39B0FF; --indigo:#818EFF; --magenta:#CA5BCD; --rose:#F77181; --green:#5AD19A;
+  --nitro:#1f9dff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(1200px 700px at 80% -10%,#101a33 0%,var(--bg) 55%),var(--bg);
+  color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.mono,pre,code{font-family:"Cascadia Code",ui-monospace,Consolas,monospace}
+.wrap{display:grid;grid-template-columns:248px 1fr;max-width:1400px;margin:0 auto;min-height:100vh}
+nav{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:24px 16px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,#0a0d18,#070912)}
+nav h1{font-size:15px;letter-spacing:.5px;margin:0 0 4px;color:var(--ink)}
+nav .sub{color:var(--muted);font-size:11px;margin-bottom:18px}
+nav a{display:block;color:var(--muted);padding:6px 10px;border-radius:8px;font-size:13px}
+nav a:hover{background:#141a2c;color:var(--ink);text-decoration:none}
+nav .grp{color:#667;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 4px;padding-left:10px}
+main{padding:40px 48px;max-width:1100px}
+.hero{border:1px solid var(--line);border-radius:18px;padding:34px 36px;margin-bottom:34px;
+  background:
+   radial-gradient(600px 200px at 100% 0,#39b0ff14,transparent),
+   linear-gradient(180deg,#0e1322,#0a0d18);position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;border-radius:18px;padding:1px;
+  background:linear-gradient(120deg,var(--rose),var(--magenta) 48%,var(--indigo));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;opacity:.5}
+.hero h2{margin:0 0 8px;font-size:30px;background:linear-gradient(90deg,#fff,var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);max-width:760px;margin:.4em 0}
+.kpis{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+.kpi{background:#0c1120;border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:120px}
+.kpi b{display:block;font-size:22px;color:var(--blue)}
+.kpi span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+section.block{margin:34px 0}
+h3.sec{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);
+  border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:18px}
+.lead{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.card h4{margin:0 0 6px;font-size:15px}
+.card p{color:var(--muted);margin:.3em 0;font-size:13.5px}
+.repo{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+  border-radius:16px;padding:20px 22px;margin:18px 0;position:relative}
+.repo:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:3px;background:var(--accent)}
+.repo-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.repo-head h3{margin:0;font-size:20px}
+.repo-head h3 a{color:var(--ink)}
+.vis{font-size:9px;letter-spacing:1px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:2px 6px;vertical-align:middle}
+.badge{font-size:11px;border:1px solid;border-radius:20px;padding:3px 12px;font-weight:600}
+.tagline{color:var(--muted);margin:10px 0}
+.meta-row{display:flex;gap:22px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:6px 0 12px}
+.meta-row b{color:var(--ink)}
+table.pkg{width:100%;border-collapse:collapse;margin:6px 0}
+table.pkg th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--line);padding:6px 8px}
+table.pkg td{padding:6px 8px;border-bottom:1px solid #1a2134;font-size:13px;vertical-align:top}
+table.pkg td.mono{color:var(--accent);white-space:nowrap}
+.extras{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:13px}
+details.tree{margin-top:12px}
+details.tree summary{cursor:pointer;color:var(--blue);font-size:13px}
+details.tree pre{background:#080b14;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;font-size:12px;color:#bcd}
+.mermaid{background:#080b14;border:1px solid var(--line);border-radius:14px;padding:20px;margin:8px 0}
+.flowtbl{width:100%;border-collapse:collapse;margin:10px 0}
+.flowtbl th,.flowtbl td{border:1px solid var(--line);padding:8px 12px;text-align:left;font-size:13px}
+.flowtbl th{background:#0d1322;color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+.flowtbl td.mono{color:var(--indigo)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding:14px 14px 14px 56px;margin:10px 0;
+  background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:12px}
+.steps li:before{content:counter(s);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:8px;
+  display:grid;place-items:center;background:#0c1120;border:1px solid var(--blue);color:var(--blue);font-weight:700}
+.steps b{color:var(--ink)} .steps code{background:#0a0e1a;padding:1px 6px;border-radius:6px;color:var(--green);font-size:12.5px}
+.turn{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:#0a0d18}
+.turn summary{cursor:pointer;padding:10px 14px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.turn .tn{color:var(--blue);font-weight:700} .turn .ts{color:#667;font-size:11px}
+.turn .snip{color:var(--muted);font-size:12.5px;overflow:hidden}
+.msg{padding:10px 14px;border-top:1px solid #161c2e}
+.msg .who{font-size:10px;letter-spacing:1px;color:var(--muted);margin-bottom:4px}
+.msg.user .who{color:var(--green)} .msg.asst .who{color:var(--indigo)}
+.msg pre{white-space:pre-wrap;word-break:break-word;margin:0;font-size:12.5px;color:#cdd6ea}
+.toolbar{display:flex;gap:10px;margin:10px 0}
+.btn{background:#0d1322;border:1px solid var(--blue);color:var(--blue);border-radius:9px;padding:8px 14px;cursor:pointer;font-size:13px}
+.btn:hover{background:var(--blue);color:#03070f}
+.rawjson{max-height:420px;overflow:auto;background:#080b14;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:11.5px;color:#9fb3d8;white-space:pre-wrap;word-break:break-word}
+footer{color:#566;border-top:1px solid var(--line);margin-top:40px;padding-top:18px;font-size:12px}
+@media(max-width:880px){.wrap{grid-template-columns:1fr}nav{position:static;height:auto}main{padding:24px}.grid2{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="wrap">
+<nav>
+  <h1>SWE Scout Wiki</h1>
+  <div class="sub">Architecture Intelligence &middot; Sunday, June 14, 2026</div>
+  <a href="#overview">Overview</a>
+  <a href="#ai">What is Architecture Intelligence</a>
+  <a href="#map">Interconnection map</a>
+  <a href="#dataflow">Data &amp; control flow</a>
+  <a href="#identity">Identity &amp; auth ({{SCOUT_APP_NAME}})</a>
+  <div class="grp">Repositories</div>
+  <a href="#repo-scout-swe">scout-swe</a>
+  <a href="#repo-aether">aether</a>
+  <a href="#repo-weave">weave</a>
+  <a href="#repo-scout-sdk">scout-sdk</a>
+  <a href="#repo-scout-app">scout-app</a>
+  <a href="#repo-scout-cli">scout-cli</a>
+  <div class="grp">Provenance</div>
+  <a href="#deploy">{{SCOUT_TENANT_NAME}} deployment</a>
+  <a href="#session">Deployment session template</a>
+</nav>
+<main>
+  <div class="panel"><strong>Public template.</strong> Replace values such as <code>{{SCOUT_TENANT_ID}}</code>, <code>{{SCOUT_APP_CLIENT_ID}}</code>, <code>{{SCOUT_APP_OBJECT_ID}}</code>, <code>{{SCOUT_DOMAIN}}</code>, and node-host placeholders only in a private deployment copy.</div>
+  <div class="hero">
+    <h2>Scout Architecture Intelligence</h2>
+    <p>How six repositories under <a href="https://github.com/{{GITHUB_ACCOUNT}}" target="_blank">github.com/{{GITHUB_ACCOUNT}}</a> compose into one coherent control plane for the <b>Microsoft Scout</b> fleet (Frontier v0.22.333) using the <b>{{SCOUT_TENANT_NAME}}</b> tenant template.</p>
+    <div class="kpis">
+      <div class="kpi"><b>6</b><span>Repositories</span></div>
+      <div class="kpi"><b>3</b><span>Layer stack</span></div>
+      <div class="kpi"><b>16</b><span>/scout API routes</span></div>
+      <div class="kpi"><b>9</b><span>MCP tools</span></div>
+      <div class="kpi"><b>11</b><span>Graph scopes</span></div>
+      <div class="kpi"><b>17</b><span>Session turns</span></div>
+    </div>
+  </div>
+
+  <section class="block" id="overview">
+    <h3 class="sec">Overview</h3>
+    <p class="lead">Microsoft Scout is Microsoft's first "Autopilot" agent - a Frontier-tier desktop app that reads/writes files, runs shell, drives a Playwright browser, and queries M365 via Work IQ. Once Scout was unblocked on the {{SCOUT_TENANT_NAME}} tenant, we built a full software-engineering platform around it: an object model, a 16-route control-plane API on the DarbotLM gateway ({{SCOUT_GATEWAY_HOST}}), and six repositories that turn the running fleet into programmable, composable, observable infrastructure - what we call <b>Architecture Intelligence</b>.</p>
+    <div class="grid2">
+      <div class="card"><h4>The control plane</h4><p>scout-api exposes the fleet as <code>/scout/*</code> routes (health, info, catalog, fleet, nodes, policy, policy/render, sessions, tasks, manifest, schema), backed by <b>scloud-om</b> (Pydantic object model: Node/Agent/Policy/Session/Task/Fleet/Resource/Catalog).</p></div>
+      <div class="card"><h4>The stack shape</h4><p><b>scout-swe</b> (framework) runs on <b>aether</b> (runtime) and is composed by <b>weave</b> (orchestration). <b>scout-sdk</b> is the canonical client; <b>scout-app</b> exposes it over MCP; <b>scout-cli</b> drives it from a terminal.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="ai">
+    <h3 class="sec">What "Architecture Intelligence" means here</h3>
+    <p class="lead">Each repo answers a different question about the system, and together they let the architecture reason about itself:</p>
+    <table class="flowtbl">
+      <thead><tr><th>Question</th><th>Answered by</th><th>Mechanism</th></tr></thead>
+      <tbody>
+        <tr><td>What exists in the fleet?</td><td class="mono">scout-sdk / scloud-om</td><td>Typed catalog, nodes, fleet summary</td></tr>
+        <tr><td>How should it behave?</td><td class="mono">policy model</td><td>renderPolicy(linux/windows/macos) + diffPolicy</td></tr>
+        <tr><td>How do agents talk?</td><td class="mono">@*/a2a</td><td>Agent2Agent protocol types + JSON Schemas</td></tr>
+        <tr><td>Where does work run?</td><td class="mono">aether</td><td>SandboxExecutor + Scheduler + A2A transport</td></tr>
+        <tr><td>How is work composed?</td><td class="mono">weave</td><td>SwarmGraph DAG + Router (A2A/MCP/Scout)</td></tr>
+        <tr><td>How do tools reach it?</td><td class="mono">scout-app / scout-cli</td><td>MCP server+host / standalone CLI</td></tr>
+        <tr><td>How is it routed/secured?</td><td class="mono">apim/</td><td>Azure APIM policies for A2A + MCP routing</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="block" id="map">
+    <h3 class="sec">Interconnection map</h3>
+    <div class="mermaid">flowchart TB
+  subgraph TEN["{{SCOUT_TENANT_NAME}} Tenant ({{SCOUT_TENANT_ID}})"]
+    LIC["M365 Copilot license<br/>{{SCOUT_LICENSED_USER}}"]
+    POL["Intune ADMX: {{SCOUT_POLICY_NAME}}<br/>policyId {{SCOUT_POLICY_ID}}<br/>Enabled tenant-wide"]
+    APPREG["{{SCOUT_APP_NAME}} Entra app-reg<br/>client {{SCOUT_APP_CLIENT_ID}} (public, no secret)"]
+  end
+  subgraph FLEET["Microsoft Scout fleet (Frontier v0.22.333)"]
+    N68["node {{SCOUT_PRIMARY_NODE_HOST}}<br/>HKLM\\SOFTWARE\\Policies\\Scout<br/>AllowScoutFrontierAccess=1"]
+    N69["node {{SCOUT_GATEWAY_HOST}}<br/>DarbotLM gateway + proxy"]
+  end
+  POL -->|writes policy key| N68
+  LIC -->|signs in / Frontier gate clears| N68
+  APPREG -->|MSAL public client - 11 delegated Graph scopes| LIC
+  APPREG -.->|ms-clawpilot://auth/callback| N68
+  N69 -->|/scout API 16 routes| API["scout-api (gateway)"]
+  API --> OM["scloud-om object model"]
+
+  subgraph STACK["Architecture Intelligence stack (github.com/{{GITHUB_ACCOUNT}})"]
+    SWE["scout-swe<br/>framework + SDK"]
+    AE["aether<br/>runtime"]
+    WV["weave<br/>orchestration"]
+    SDK["scout-sdk<br/>canonical SDK"]
+    APP["scout-app<br/>MCP app"]
+    CLI["scout-cli<br/>CLI"]
+  end
+  SWE -->|runs on| AE
+  WV -->|composes| SWE
+  WV -->|composes| AE
+  SDK -->|typed client| API
+  APP -->|MCP server/host| API
+  CLI -->|commands| API
+  SWE --> API
+  AE --> API
+  WV --> API
+</div>
+  </section>
+
+  <section class="block" id="dataflow">
+    <h3 class="sec">Data &amp; control flow</h3>
+    <table class="flowtbl">
+      <thead><tr><th>Layer</th><th>Repo</th><th>Depends on</th><th>Exposes</th></tr></thead>
+      <tbody>
+        <tr><td>Contract</td><td class="mono">scout-sdk</td><td>scout-api (OpenAPI)</td><td>ScoutClient (TS+Py), policy render, mock</td></tr>
+        <tr><td>Framework</td><td class="mono">scout-swe</td><td>scout-api, aether</td><td>SDK, A2A, runtime, CLI, APIM, automations</td></tr>
+        <tr><td>Runtime</td><td class="mono">aether</td><td>scout-api</td><td>ScoutRuntime, SandboxExecutor, Scheduler</td></tr>
+        <tr><td>Orchestration</td><td class="mono">weave</td><td>scout-swe, aether</td><td>SwarmGraph DAG + Router</td></tr>
+        <tr><td>Integration</td><td class="mono">scout-app</td><td>scout-api</td><td>MCP server (9 tools) + MCP host</td></tr>
+        <tr><td>Operator</td><td class="mono">scout-cli</td><td>scout-api</td><td>Terminal commands</td></tr>
+      </tbody>
+    </table>
+    <p class="lead">Every layer carries its own copy of the SDK + A2A types so it can be used standalone, but all converge on the same control-plane contract (<code>scout-api.yaml</code>) and the same managed-policy model.</p>
+  </section>
+
+  <section class="block" id="identity">
+    <h3 class="sec">Identity &amp; auth - {{SCOUT_APP_NAME}} Entra app registration</h3>
+    <p class="lead">The control plane is only half the picture. Before any node can sign in to {{SCOUT_TENANT_NAME}} and clear the Frontier gate, the desktop client (Scout / {{SCOUT_APP_NAME}}) authenticates through a single Entra app registration. This is the <b>identity layer</b> of the architecture - incorporated here from the canonical record in <a href="swe_clippyclaw_app_reg.html">swe_clippyclaw_app_reg.html</a>.</p>
+    <div class="grid2">
+      <div class="card"><h4>Registration facts</h4>
+        <table class="flowtbl">
+          <tr><td>Display name</td><td class="mono">{{SCOUT_APP_NAME}}</td></tr>
+          <tr><td>Application (client) ID</td><td class="mono">{{SCOUT_APP_CLIENT_ID}}</td></tr>
+          <tr><td>Object ID</td><td class="mono">{{SCOUT_APP_OBJECT_ID}}</td></tr>
+          <tr><td>Tenant (directory) ID</td><td class="mono">{{SCOUT_TENANT_ID}}</td></tr>
+          <tr><td>Tenant domain</td><td class="mono">{{SCOUT_DOMAIN}} ({{SCOUT_DOMAIN_ALT}})</td></tr>
+          <tr><td>Audience</td><td class="mono">AzureADMyOrg (single tenant)</td></tr>
+          <tr><td>Client type</td><td class="mono">Public / native - isFallbackPublicClient=true, no secret</td></tr>
+        </table>
+      </div>
+      <div class="card"><h4>Why it is shaped this way</h4>
+        <p><b>Public client, no secret</b> - a desktop app can't keep a secret; MSAL uses interactive + device-code + silent-refresh flows, zero credentials shipped.</p>
+        <p><b>Deep-link redirect, not localhost</b> - registers custom scheme <code>ms-clawpilot://</code>; Electron intercepts via second-instance (Win/Linux) or open-url (macOS). Satisfies SPACE/compliance (no localhost web reply URL).</p>
+        <p><b>Delegated only</b> - all Graph scopes act as the signed-in user; never application permissions. Source of truth: <code>electron/auth/msal-provider.ts</code> + <code>deep-link-loopback.ts</code> + <code>electron-builder.json5</code>.</p>
+      </div>
+    </div>
+    <table class="flowtbl">
+      <thead><tr><th>Public-client redirect URIs</th><th>11 delegated Graph scopes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="mono">ms-clawpilot://auth/callback<br>msauth.com.microsoft.clawpilot://auth<br>msauth.com.msauth.unsignedapp://auth&nbsp;(dev)</td>
+          <td class="mono">openid &middot; profile &middot; email &middot; offline_access &middot; User.Read<br>Mail.ReadWrite &middot; Mail.Send &middot; Calendars.ReadWrite<br>Files.ReadWrite &middot; Chat.ReadWrite &middot; People.Read</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="lead">How it fits Architecture Intelligence: this app-reg is the <b>front door</b>. MSAL acquires delegated Graph tokens which power Scout's Work IQ (mail/calendar/files/Teams/people); the same signed-in account holds the M365 Copilot license that satisfies the Frontier policy gate. Provisioning a new node therefore needs both - the policy key <i>and</i> a sign-in through this registration. Keep reviewed installer scripts as separate source files and supply tenant values through parameters or environment variables.</p>
+  </section>
+
+  <section class="block">
+    <h3 class="sec">Repositories</h3>
+
+    <section class="repo" id="repo-scout-swe" style="--accent:#39B0FF">
+      <div class="repo-head">
+        <span class="badge" style="background:#39B0FF1a;color:#39B0FF;border-color:#39B0FF55">Framework + SDK layer</span>
+        <h3><a href="https://github.com/{{GITHUB_ACCOUNT}}/scout-swe" target="_blank">scout-swe</a> <span class="vis">PUBLIC</span></h3>
+      </div>
+      <p class="tagline">Software-engineering framework and SDK for the Scout control plane and the Microsoft Scout fleet.</p>
+      <div class="meta-row">
+        <span><b>Lang</b> TypeScript / Python</span>
+        <span><b>Size</b> 33.4 KB src</span>
+        <span><b>Pushed</b> 2026-06-09</span>
+      </div>
+      <table class="pkg"><thead><tr><th>Package</th><th>Description</th></tr></thead><tbody><tr><td class='mono'>@scout-swe/sdk</td><td>Typed TS client for the Scout API + policy helpers</td></tr><tr><td class='mono'>@scout-swe/a2a</td><td>Agent2Agent protocol types + JSON Schemas</td></tr><tr><td class='mono'>@scout-swe/runtime</td><td>Task/session execution, A2A transport, scheduler</td></tr><tr><td class='mono'>@scout-swe/cli</td><td>scout-swe command line</td></tr><tr><td class='mono'>scout_swe (Python)</td><td>httpx + pydantic bindings</td></tr></tbody></table>
+      <ul class="extras"><li>apim/ - OpenAPI + Azure APIM policies (A2A/MCP routing)</li><li>automations/ - scheduled Scout tasks</li><li>docs/ - Docusaurus site</li></ul>
+      <details class="tree"><summary>Key files</summary><pre>packages/{sdk,a2a,runtime,cli}/src/*
+apim/policies/{inbound,a2a-mcp-routing}.xml  apim/openapi/scout-api.yaml
+automations/scheduled/weekly-fleet-report.json
+python/scout_swe/{client,models}.py  docs/docs/{architecture,apim,a2a,runtime,policy}.md</pre></details>
+    </section>
+    <section class="repo" id="repo-aether" style="--accent:#5AD19A">
+      <div class="repo-head">
+        <span class="badge" style="background:#5AD19A1a;color:#5AD19A;border-color:#5AD19A55">Execution runtime</span>
+        <h3><a href="https://github.com/{{GITHUB_ACCOUNT}}/aether" target="_blank">aether</a> <span class="vis">PUBLIC</span></h3>
+      </div>
+      <p class="tagline">Lightweight agent execution runtime: sandboxed task/session execution, scheduler/heartbeat, A2A transport.</p>
+      <div class="meta-row">
+        <span><b>Lang</b> TypeScript</span>
+        <span><b>Size</b> 28.3 KB src</span>
+        <span><b>Pushed</b> 2026-06-09</span>
+      </div>
+      <table class="pkg"><thead><tr><th>Package</th><th>Description</th></tr></thead><tbody><tr><td class='mono'>@aether/runtime</td><td>ScoutRuntime, SandboxExecutor, Scheduler, A2A transport</td></tr><tr><td class='mono'>@aether/sdk</td><td>Typed Scout API client + policy helpers</td></tr><tr><td class='mono'>@aether/a2a</td><td>Agent2Agent protocol types + JSON Schemas</td></tr><tr><td class='mono'>@aether/cli</td><td>command line</td></tr></tbody></table>
+      <ul class="extras"><li>SandboxExecutor (allowShell/allowWrite/blockedEgressOrigins)</li><li>apim/, automations/, Docusaurus docs/</li></ul>
+      <details class="tree"><summary>Key files</summary><pre>packages/runtime/src/{runtime,sandbox,scheduler,transport}.ts
+packages/{sdk,a2a,cli}/src/*
+apim/policies/*.xml  docs/docs/{runtime,architecture,policy}.md</pre></details>
+    </section>
+    <section class="repo" id="repo-weave" style="--accent:#CA5BCD">
+      <div class="repo-head">
+        <span class="badge" style="background:#CA5BCD1a;color:#CA5BCD;border-color:#CA5BCD55">SWE-swarm orchestration</span>
+        <h3><a href="https://github.com/{{GITHUB_ACCOUNT}}/weave" target="_blank">weave</a> <span class="vis">PUBLIC</span></h3>
+      </div>
+      <p class="tagline">Orchestration/composition layer: an agent/tool DAG with full APIM routing for A2A + MCP, composing Scout and DLMCP resources.</p>
+      <div class="meta-row">
+        <span><b>Lang</b> TypeScript</span>
+        <span><b>Size</b> 30.2 KB src</span>
+        <span><b>Pushed</b> 2026-06-09</span>
+      </div>
+      <table class="pkg"><thead><tr><th>Package</th><th>Description</th></tr></thead><tbody><tr><td class='mono'>@weave/orchestrator</td><td>SwarmGraph (agent/tool DAG) + Router (A2A/MCP/Scout)</td></tr><tr><td class='mono'>@weave/sdk</td><td>Typed Scout API client + policy helpers</td></tr><tr><td class='mono'>@weave/a2a</td><td>Agent2Agent protocol types + JSON Schemas</td></tr><tr><td class='mono'>@weave/runtime</td><td>task/session execution, A2A transport, scheduler</td></tr><tr><td class='mono'>@weave/cli</td><td>command line</td></tr></tbody></table>
+      <ul class="extras"><li>apim/ A2A/MCP routing policies</li><li>automations/, Docusaurus docs/</li></ul>
+      <details class="tree"><summary>Key files</summary><pre>packages/orchestrator/src/{graph,router}.ts
+packages/{sdk,a2a,runtime,cli}/src/*
+apim/policies/*.xml  docs/docs/{orchestrator,architecture,apim}.md</pre></details>
+    </section>
+    <section class="repo" id="repo-scout-sdk" style="--accent:#818EFF">
+      <div class="repo-head">
+        <span class="badge" style="background:#818EFF1a;color:#818EFF;border-color:#818EFF55">Canonical SDK</span>
+        <h3><a href="https://github.com/{{GITHUB_ACCOUNT}}/scout-sdk" target="_blank">scout-sdk</a> <span class="vis">PUBLIC</span></h3>
+      </div>
+      <p class="tagline">The canonical TypeScript + Python SDK for the Scout control plane: retries, A2A, policy render, task helpers, built-in mock.</p>
+      <div class="meta-row">
+        <span><b>Lang</b> TypeScript / Python</span>
+        <span><b>Size</b> 47.4 KB src</span>
+        <span><b>Pushed</b> 2026-06-10</span>
+      </div>
+      <table class="pkg"><thead><tr><th>Package</th><th>Description</th></tr></thead><tbody><tr><td class='mono'>packages/sdk (TS)</td><td>ScoutClient, http(retry), a2a, policy, mock, types</td></tr><tr><td class='mono'>scout_sdk (Python)</td><td>sync ScoutClient + async AsyncScoutClient + models + policy</td></tr><tr><td class='mono'>openapi/scout-api.yaml</td><td>OpenAPI 3 contract</td></tr></tbody></table>
+      <ul class="extras"><li>Typed errors: ScoutApiError / ScoutTimeoutError / ScoutNetworkError</li><li>renderPolicy(linux/windows/macos) + parsePolicy + diffPolicy</li><li>createMockFetch() - run with no gateway</li></ul>
+      <details class="tree"><summary>Key files</summary><pre>packages/sdk/src/{client,http,a2a,a2a-client,policy,errors,mock,types}.ts
+python/scout_sdk/{client,aio,models,policy,errors}.py
+openapi/scout-api.yaml
+docs/ (Docusaurus)  examples/{basic.ts,example.py}</pre></details>
+    </section>
+    <section class="repo" id="repo-scout-app" style="--accent:#F77181">
+      <div class="repo-head">
+        <span class="badge" style="background:#F771811a;color:#F77181;border-color:#F7718155">MCP application</span>
+        <h3><a href="https://github.com/{{GITHUB_ACCOUNT}}/scout-app" target="_blank">scout-app</a> <span class="vis">PUBLIC</span></h3>
+      </div>
+      <p class="tagline">An MCP application: both an MCP server (Scout as tools/resources/prompts) and an MCP host (consuming other MCP servers).</p>
+      <div class="meta-row">
+        <span><b>Lang</b> TypeScript</span>
+        <span><b>Size</b> 15.9 KB src</span>
+        <span><b>Pushed</b> 2026-06-09</span>
+      </div>
+      <table class="pkg"><thead><tr><th>Package</th><th>Description</th></tr></thead><tbody><tr><td class='mono'>@scout-app/mcp-server</td><td>9 Scout tools, 2 resources, scout-triage prompt (stdio + HTTP)</td></tr><tr><td class='mono'>@scout-app/mcp-host</td><td>MCP host/client to aggregate other MCP servers</td></tr><tr><td class='mono'>@scout-app/sdk</td><td>self-contained Scout control-plane client</td></tr><tr><td class='mono'>@scout-app/app</td><td>scout-app binary</td></tr></tbody></table>
+      <ul class="extras"><li>Resources: scout://catalog, scout://nodes</li><li>Transports: stdio + Streamable HTTP (:8970/mcp)</li><li>Registers with Claude Desktop / VS Code / Microsoft Scout</li></ul>
+      <details class="tree"><summary>Key files</summary><pre>packages/mcp-server/src/{server,tools,transports}.ts
+packages/mcp-host/src/host.ts
+packages/app/src/index.ts  packages/sdk/src/client.ts
+docs/docs/{mcp-tools,host,transports,registering}.md</pre></details>
+    </section>
+    <section class="repo" id="repo-scout-cli" style="--accent:#F77181">
+      <div class="repo-head">
+        <span class="badge" style="background:#F771811a;color:#F77181;border-color:#F7718155">Standalone CLI</span>
+        <h3><a href="https://github.com/{{GITHUB_ACCOUNT}}/scout-cli" target="_blank">scout-cli</a> <span class="vis">PUBLIC</span></h3>
+      </div>
+      <p class="tagline">Zero-runtime-dependency command line for the Scout control plane and the Microsoft Scout fleet.</p>
+      <div class="meta-row">
+        <span><b>Lang</b> TypeScript</span>
+        <span><b>Size</b> 7.5 KB src</span>
+        <span><b>Pushed</b> 2026-06-09</span>
+      </div>
+      <table class="pkg"><thead><tr><th>Package</th><th>Description</th></tr></thead><tbody><tr><td class='mono'>scout health / info</td><td>control-plane health / surface description</td></tr><tr><td class='mono'>scout nodes / node &lt;id&gt;</td><td>list / show Microsoft Scout fleet nodes</td></tr><tr><td class='mono'>scout catalog / agents</td><td>DLMCP resource counts / control agents</td></tr><tr><td class='mono'>scout policy --platform</td><td>baseline policy, optionally rendered</td></tr><tr><td class='mono'>scout dispatch / tasks / get-task</td><td>dispatch + inspect tasks</td></tr></tbody></table>
+      <ul class="extras"><li>--gateway URL (or SCOUT_GATEWAY, default http://localhost:9000)</li><li>--json for raw output</li></ul>
+      <details class="tree"><summary>Key files</summary><pre>src/{index,client,format,types}.ts
+test/client.test.ts  README.md</pre></details>
+    </section>
+  </section>
+
+  <section class="block" id="deploy">
+    <h3 class="sec">Provenance - {{SCOUT_TENANT_NAME}} deployment</h3>
+    <p class="lead">Use this section to document a Scout deployment to the {{SCOUT_TENANT_NAME}} tenant. Tenant <code>{{SCOUT_TENANT_ID}}</code>; work account <code>{{SCOUT_LICENSED_USER}}</code>.</p>
+    <ol class="steps">
+      <li><b>Authenticate</b> Azure + Entra to <code>{{SCOUT_LICENSED_USER}}</code> (subscription {{AZURE_SUBSCRIPTION_NAME}} <code>{{AZURE_SUBSCRIPTION_ID}}</code>).</li>
+      <li><b>Hit the Frontier gate</b> - "Scout hasn't been set up for your organization." Two-layer gate: org policy + licensed account.</li>
+      <li><b>Tenant policy</b> - Intune ADMX <b>{{SCOUT_POLICY_NAME}}</b> (policyId <code>{{SCOUT_POLICY_ID}}</code>) confirmed Enabled tenant-wide.</li>
+      <li><b>Per-machine key</b> - over SSH on <code>{{SCOUT_PRIMARY_NODE_HOST}}</code> set <code>HKLM\SOFTWARE\Policies\Scout\AllowScoutFrontierAccess = 1</code> (exactly what the ADMX writes).</li>
+      <li><b>Relaunch + sign in</b> - waitlist cleared; validated genuine Microsoft-signed binary <b>v0.22.333.0</b>, GitHub Copilot identity <code>login={{GITHUB_ACCOUNT}}, staff=true</code>.</li>
+      <li><b>Linux policy parity</b> - reverse-engineered loader <code>RF(win32) ?? VF(darwin) ?? HF(linux) ?? loadFromFile()</code>; Linux reads <b>camelCase</b> <code>/etc/clawpilot/policy.json</code>.</li>
+      <li><b>Control plane</b> - on <code>{{SCOUT_GATEWAY_HOST}}</code> built scloud-om + scout-api (16 routes) + scout-cli into the DarbotLM gateway/proxy/router (commit <code>84d67d3</code>).</li>
+      <li><b>Platform repos</b> - created scout-swe, aether, weave, then scout-app, scout-cli, and the canonical scout-sdk.</li>
+    </ol>
+    <table class="flowtbl">
+      <thead><tr><th>Platform</th><th>Policy source</th><th>Key casing</th></tr></thead>
+      <tbody>
+        <tr><td>Windows</td><td class="mono">HKLM\SOFTWARE\Policies\Scout</td><td>PascalCase (AllowScoutFrontierAccess)</td></tr>
+        <tr><td>macOS</td><td class="mono">/Library/Managed Preferences/com.microsoft.clawpilot.plist</td><td>PascalCase</td></tr>
+        <tr><td>Linux</td><td class="mono">/etc/clawpilot/policy.json</td><td>camelCase (allowScoutFrontierAccess)</td></tr>
+        <tr><td>No-root fallback</td><td class="mono">&lt;userData&gt;/tenant-policy.json</td><td>camelCase</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="block" id="session"><h3 class="sec">Deployment session template</h3><p class="lead">Private session transcripts are intentionally excluded. Record only sanitized decisions, validation evidence, and reusable steps here.</p></section>
+
+  <footer>
+    Public template derived from deployment documentation. Replace placeholders only in private deployment copies.
+  </footer>
+</main>
+</div>
+<script>
+const SESSION = {"sessionId":"{{SOURCE_SESSION_ID}}","turnCount":0,"turns":[]};
+function copyJson(){navigator.clipboard.writeText(JSON.stringify(SESSION,null,2));}
+function dl(){const b=new Blob([JSON.stringify(SESSION,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='scout-session-history.json';a.click();}
+let open=false;
+function toggleAll(){open=!open;document.querySelectorAll('details.turn').forEach(d=>d.open=open);}
+mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{
+  primaryColor:'#10131f',primaryBorderColor:'#39B0FF',primaryTextColor:'#e8ecf6',
+  lineColor:'#5a6a93',fontFamily:'Segoe UI'}});
+</script>
+</body></html>
