@@ -10,6 +10,7 @@ const config = {
   projectName: 'scout-deployer',
   deploymentBranch: 'master',
   onBrokenLinks: 'throw',
+  favicon: 'img/favicon.svg',
   headTags: [
     {
       tagName: 'script',
