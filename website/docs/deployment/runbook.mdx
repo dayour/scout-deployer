@@ -1,0 +1,133 @@
+---
+title: Deployment runbook
+sidebar_position: 2
+description: End-to-end Scout deployment and provisioning runbook.
+---
+
+# Deployment runbook
+
+## Prerequisites
+
+- Windows PowerShell 5.1 or later
+- PuTTY `plink.exe` and `pscp.exe`
+- SSH key authorized on each target node
+- Target account is a local administrator
+- Microsoft Scout installer available locally
+- Configured `.env`
+- Node.js 18 or later only when using the npm launcher
+
+## Launch options
+
+### Double-click
+
+```text
+ScoutDeployer.cmd
+```
+
+### PowerShell
+
+```powershell
+.\ScoutDeployer.ps1
+.\ScoutDeployer.ps1 -InstallerPath "C:\path\to\MicrosoftScout-Setup.exe"
+```
+
+### npm launcher
+
+```powershell
+npx scout-deployer
+npx scout-deployer --installer "C:\path\to\MicrosoftScout-Setup.exe"
+npx scout-deployer --target scout-node.contoso.com --log-dir "C:\Logs\scout"
+```
+
+Passwords are prompted when omitted. If a password is supplied through the launcher,
+console argument output is redacted. Prefer interactive prompting to avoid command-line
+process exposure.
+
+## Binary deployment sequence
+
+1. Load and validate configuration.
+2. Prompt for target IP address or hostname.
+3. Prompt for remote credentials.
+4. Discover the SSH host-key fingerprint.
+5. Validate SSH connectivity.
+6. Enumerate remote user profiles.
+7. Select individual profiles or all profiles.
+8. Copy the installer to a shared staging location.
+9. Set `HKLM\SOFTWARE\Policies\Scout\AllowScoutFrontierAccess = 1`.
+10. Run the installer under each selected profile.
+11. Verify installation results.
+
+## Provisioning menu
+
+| Option | Surface |
+|---|---|
+| Skills | Deploy Copilot skill directories |
+| Connectors | Deploy connector manifests |
+| Tools | Register MCP server manifests |
+| Permissions | Apply Scout policy and file ACLs |
+| Memory | Deploy memory/plugin data |
+| Extensions | Install the extension list |
+| Session history | Archive or restore session state |
+| Automations | Deploy tasks, startup scripts, and runbooks |
+
+## Per-host rollout
+
+The Entra public-client registration is tenant-wide. Do not create one registration per
+machine. A new host needs:
+
+1. The correct platform policy source.
+2. Microsoft Scout installed.
+3. Interactive or device-code sign-in by the licensed user.
+4. A relaunch after policy changes.
+5. Post-deployment verification.
+
+### Windows
+
+```powershell
+New-Item -Path "HKLM:\SOFTWARE\Policies\Scout" -Force | Out-Null
+New-ItemProperty `
+  -Path "HKLM:\SOFTWARE\Policies\Scout" `
+  -Name AllowScoutFrontierAccess `
+  -PropertyType DWord `
+  -Value 1 `
+  -Force
+```
+
+### Linux
+
+```bash
+sudo install -d -m 0755 /etc/clawpilot
+sudo install -m 0644 policy.json /etc/clawpilot/policy.json
+```
+
+```json
+{
+  "version": 1,
+  "allowScoutFrontierAccess": true
+}
+```
+
+### macOS
+
+Deploy the repository's `microsoft-scout.mobileconfig` with Intune, Jamf, or another
+device-management system.
+
+## Frontier gate
+
+The gate has two independent requirements:
+
+- Organization/device policy enables Scout Frontier access.
+- The signed-in account has the required Microsoft 365 Copilot license.
+
+After deployment, launch Scout interactively and sign in with the configured licensed
+account.
+
+## Logs
+
+Each run writes a timestamped log under the configured log directory.
+
+```text
+[YYYY-MM-DD HH:MM:SS] [LEVEL] message
+```
+Supported levels include `STEP`, `OK`, `WARN`, `ERROR`, `INFO`, and `DEBUG`.
+Supported levels include `STEP`, `OK`, `WARN`, `ERROR`, `INFO`, and `DEBUG`.

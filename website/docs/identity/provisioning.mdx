@@ -1,0 +1,133 @@
+---
+title: Provisioning runbook
+sidebar_position: 2
+description: Idempotent Entra app-registration creation, permission, consent, branding, and wiring steps.
+---
+
+# Entra provisioning runbook
+
+## Prerequisites
+
+- Azure CLI on `PATH`
+- Permission to create app registrations in the target tenant
+- A privileged role if tenant-wide admin consent will be granted
+- `jq` when using Bash automation
+- Tenant values supplied through parameters or environment variables
+
+Sign in without combining device code and `--username`:
+
+```powershell
+az login --tenant {{SCOUT_TENANT_ID}} --use-device-code --allow-no-subscriptions
+az account show --query "{tenantId:tenantId,user:user.name}" -o json
+```
+
+## Eight-step registration sequence
+
+### 1. Authenticate in the target tenant
+
+Confirm that the active tenant and user are correct before changing the registration.
+
+```powershell
+az account show --query "{tenantId:tenantId,user:user.name}" -o json
+```
+
+### 2. Create or locate the application
+
+Use an idempotent script that finds the application by display name or creates it with
+`signInAudience` set to `AzureADMyOrg`.
+
+Expected outputs:
+
+```text
+DisplayName : {{SCOUT_APP_NAME}}
+ClientId    : {{SCOUT_APP_CLIENT_ID}}
+ObjectId    : {{SCOUT_APP_OBJECT_ID}}
+```
+
+### 3. Configure native redirects
+
+```powershell
+az ad app update `
+  --id {{SCOUT_APP_CLIENT_ID}} `
+  --public-client-redirect-uris `
+    ms-clawpilot://auth/callback `
+    msauth.com.microsoft.clawpilot://auth `
+    msauth.com.msauth.unsignedapp://auth
+```
+
+Do not add a localhost web redirect.
+
+### 4. Enable fallback public-client flows
+
+Patch the application object, not the service principal:
+
+```powershell
+$body = '{"isFallbackPublicClient":true}'
+az rest `
+  --method PATCH `
+  --uri "https://graph.microsoft.com/v1.0/applications/{{SCOUT_APP_OBJECT_ID}}" `
+  --body $body
+```
+
+### 5. Apply Graph delegated permissions
+
+Apply the Microsoft Graph `requiredResourceAccess` block from the
+[template manifest](../reference/schemas#entra-app-registration-template).
+
+:::warning Azure CLI update behavior
+`az ad app update --required-resource-accesses` can silently leave permission entries
+unchanged on an existing application. Use an explicit Microsoft Graph PATCH to
+`/applications/{objectId}` and verify the result.
+:::
+
+### 6. Brand the application
+
+Open Entra Branding and properties, upload a square application logo, set the publisher
+domain, and save.
+
+```powershell
+Start-Process "https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Branding/appId/{{SCOUT_APP_CLIENT_ID}}"
+```
+
+### 7. Grant admin consent when required
+
+```powershell
+az ad app permission admin-consent --id {{SCOUT_APP_CLIENT_ID}}
+```
+
+### 8. Record client constants
+
+Store the application/client ID and tenant ID in private runtime configuration:
+
+```powershell
+Write-Output "CLIENT_ID={{SCOUT_APP_CLIENT_ID}}"
+Write-Output "TENANT_ID={{SCOUT_TENANT_ID}}"
+```
+
+Never add the substituted values to this public repository.
+
+## Wire the desktop client
+
+1. Set the client ID, tenant ID, and tenant-specific authority.
+2. Compare runtime requested scopes with all eleven registered delegated permissions.
+3. Launch the application.
+4. Complete interactive or device-code sign-in.
+5. Confirm the token cache contains the expected tenant and client identifiers.
+
+## Logo upload through Microsoft Graph
+
+```powershell
+$token = az account get-access-token `
+  --resource https://graph.microsoft.com `
+  --query accessToken `
+  -o tsv
+
+Invoke-RestMethod `
+  -Method Put `
+  -Uri "https://graph.microsoft.com/v1.0/applications/{{SCOUT_APP_OBJECT_ID}}/logo" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "image/png" `
+  -Body ([IO.File]::ReadAllBytes("scout-logo-square.png"))
+```
+Use a square PNG or JPEG under the portal size limit. Do not log the access token.
+Use a square PNG or JPEG under the portal size limit. Do not log the access token.

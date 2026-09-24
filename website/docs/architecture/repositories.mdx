@@ -1,0 +1,120 @@
+---
+title: Repository map
+sidebar_position: 2
+description: Responsibilities and key packages across the Scout architecture repositories.
+---
+
+# Repository map
+
+The combined source wiki describes six cooperating repositories around the Scout control
+plane. The names below are architecture roles; links use the public template account token.
+
+## `scout-swe`
+
+Software-engineering framework and SDK layer.
+
+| Package or area | Responsibility |
+|---|---|
+| `@scout-swe/sdk` | Typed Scout API client and policy helpers |
+| `@scout-swe/a2a` | A2A protocol types and JSON Schemas |
+| `@scout-swe/runtime` | Task/session execution, scheduler, transport |
+| `@scout-swe/cli` | Framework command line |
+| `scout_swe` | Python bindings using `httpx` and Pydantic |
+| `apim/` | OpenAPI and Azure APIM routing policies |
+| `automations/` | Scheduled Scout tasks |
+
+Representative files:
+
+```text
+packages/{sdk,a2a,runtime,cli}/src/*
+apim/policies/{inbound,a2a-mcp-routing}.xml
+apim/openapi/scout-api.yaml
+python/scout_swe/{client,models}.py
+```
+
+## `aether`
+
+Lightweight execution runtime.
+
+| Package | Responsibility |
+|---|---|
+| `@aether/runtime` | Runtime, sandbox executor, scheduler, A2A transport |
+| `@aether/sdk` | Scout API client and policy helpers |
+| `@aether/a2a` | A2A protocol types and schemas |
+| `@aether/cli` | Runtime command line |
+
+The sandbox surface includes shell/write controls and blocked browser-egress origins.
+
+## `weave`
+
+Swarm orchestration and composition layer.
+
+| Package | Responsibility |
+|---|---|
+| `@weave/orchestrator` | `SwarmGraph` agent/tool DAG and A2A/MCP/Scout router |
+| `@weave/sdk` | Scout API client |
+| `@weave/a2a` | A2A types and schemas |
+| `@weave/runtime` | Task/session execution and scheduling |
+| `@weave/cli` | Orchestration command line |
+
+## `scout-sdk`
+
+Canonical TypeScript and Python client contract.
+
+Key capabilities:
+
+- Retry-aware HTTP transport
+- Typed API and network errors
+- A2A client support
+- Policy parse, render, and diff helpers
+- Synchronous and asynchronous Python clients
+- Built-in mock transport for gateway-free testing
+
+Representative files:
+
+```text
+packages/sdk/src/{client,http,a2a,a2a-client,policy,errors,mock,types}.ts
+python/scout_sdk/{client,aio,models,policy,errors}.py
+openapi/scout-api.yaml
+```
+
+## `scout-app`
+
+MCP application that acts as both server and host.
+
+| Package | Responsibility |
+|---|---|
+| `@scout-app/mcp-server` | Nine Scout tools, two resources, and a triage prompt |
+| `@scout-app/mcp-host` | Aggregates other MCP servers |
+| `@scout-app/sdk` | Self-contained control-plane client |
+| `@scout-app/app` | Application entry point |
+
+Documented resources include `scout://catalog` and `scout://nodes`. Transports include
+stdio and Streamable HTTP.
+
+## `scout-cli`
+
+Zero-runtime-dependency operator CLI.
+
+| Command family | Purpose |
+|---|---|
+| `scout health`, `scout info` | Control-plane health and surface information |
+| `scout nodes`, `scout node <id>` | Fleet node inventory and detail |
+| `scout catalog`, `scout agents` | Resource and agent catalog |
+| `scout policy --platform` | Baseline or rendered platform policy |
+| `scout dispatch`, `scout tasks`, `scout get-task` | Task dispatch and inspection |
+
+The CLI accepts a gateway URL, supports a `SCOUT_GATEWAY` environment variable, and can
+emit raw JSON.
+
+## Contract synchronization
+
+Production changes should update these surfaces together:
+
+1. OpenAPI route contract
+2. Object-model schemas
+3. TypeScript SDK types
+4. Python SDK models
+5. CLI formatting and commands
+6. MCP tool input/output schemas
+7. Policy parser and platform renderers

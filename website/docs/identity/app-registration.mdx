@@ -1,0 +1,111 @@
+---
+title: Entra app registration
+sidebar_position: 1
+description: Public-client Entra registration design, redirects, delegated Graph permissions, and consent.
+---
+
+# Entra app registration
+
+Scout desktop authentication uses one single-tenant Microsoft Entra app registration.
+It is a public native client: it has no client secret and requests delegated permissions
+as the signed-in user.
+
+## Registration facts
+
+| Setting | Value |
+|---|---|
+| Display name | `{{SCOUT_APP_NAME}}` |
+| Application/client ID | `{{SCOUT_APP_CLIENT_ID}}` |
+| Object ID | `{{SCOUT_APP_OBJECT_ID}}` |
+| Directory/tenant ID | `{{SCOUT_TENANT_ID}}` |
+| Tenant domain | `{{SCOUT_DOMAIN}}` |
+| Supported account types | My organization only (`AzureADMyOrg`) |
+| Client type | Public/native |
+| Fallback public client | `true` |
+| Client credentials | None |
+
+## Why it is shaped this way
+
+### Public client, no secret
+
+A desktop application cannot keep a client secret confidential. Scout uses MSAL
+interactive, device-code, and silent-refresh flows and ships no credentials.
+
+### Deep link, not localhost
+
+Windows and Linux use the custom protocol `ms-clawpilot://auth/callback`. Electron handles
+the callback through its single-instance/deep-link integration. The registration does not
+need an HTTP localhost reply URL.
+
+### macOS broker redirects
+
+The signed macOS build uses `msauth.com.microsoft.clawpilot://auth`. Unsigned and development
+builds use `msauth.com.msauth.unsignedapp://auth`.
+
+## Public-client redirect URIs
+
+| URI | Platform | Source constant |
+|---|---|---|
+| `ms-clawpilot://auth/callback` | Windows and Linux | `DEEP_LINK_REDIRECT_URI` |
+| `msauth.com.microsoft.clawpilot://auth` | macOS signed build | `MACOS_BROKER_REDIRECT_URI_SIGNED` |
+| `msauth.com.msauth.unsignedapp://auth` | macOS unsigned/development | `MACOS_BROKER_REDIRECT_URI_UNSIGNED` |
+
+## Delegated Microsoft Graph permissions
+
+Microsoft Graph resource application ID:
+`00000003-0000-0000-c000-000000000000`.
+
+| Scope | Delegated permission ID |
+|---|---|
+| `User.Read` | `e1fe6dd8-ba31-4d61-89e7-88639da4683d` |
+| `User.ReadBasic.All` | `b340eb25-3456-403f-be2f-af7a0d370277` |
+| `Mail.ReadWrite` | `024d486e-b451-40bb-833d-3e66d98c5c73` |
+| `Mail.Send` | `e383f46e-2787-4529-855e-0e479a3ffac0` |
+| `Calendars.ReadWrite` | `1ec239c2-d7c9-4623-a91a-a9775856bb36` |
+| `Files.ReadWrite` | `5c28f0bf-8a70-41f1-8ab2-9032436ddb65` |
+| `Chat.ReadWrite` | `9ff7295e-131b-4d94-90e1-69fde507ac11` |
+| `People.Read` | `ba47897c-39ec-4d83-8086-ee8256fa737d` |
+| `offline_access` | `7427e0e9-2fba-42fe-b0c0-848c9e6a8182` |
+| `openid` | `37f7f235-527c-4136-accd-4a02d197296e` |
+| `profile` | `14dad69e-099b-42c9-810b-d002981feec1` |
+
+All permissions are delegated. Do not substitute application permissions.
+
+## Runtime alignment
+
+The registration must stay synchronized with:
+
+- `BASE_SCOPES` and `FEATURE_SCOPES` in the MSAL provider
+- deep-link constants
+- Electron bundle identifiers
+- packaged application authentication configuration
+
+```ts
+export const CLIENT_ID = "{{SCOUT_APP_CLIENT_ID}}";
+export const TENANT_ID = "{{SCOUT_TENANT_ID}}";
+export const AUTHORITY =
+  `https://login.microsoftonline.com/${TENANT_ID}`;
+```
+
+The home-account filter uses the configured tenant ID. Changing tenants changes which
+accounts are accepted as home accounts.
+
+## Admin consent
+
+Grant tenant-wide consent after reviewing the delegated scopes:
+
+```powershell
+az ad app permission admin-consent --id {{SCOUT_APP_CLIENT_ID}}
+```
+
+This action requires an appropriately privileged Entra role, such as Privileged Role
+Administrator or Global Administrator.
+
+## Branding
+
+Set the application logo and verified publisher domain from Entra Branding and properties.
+Portal navigation icons can remain cached for several minutes; the logo field on the
+branding page is authoritative.
+The downloadable [app-registration template](../reference/schemas#entra-app-registration-template)
+contains the redirect and permission manifest.
+contains the redirect and permission manifest.

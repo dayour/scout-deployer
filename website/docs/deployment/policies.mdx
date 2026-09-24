@@ -1,0 +1,81 @@
+---
+title: Managed policy
+sidebar_position: 3
+description: Cross-platform policy locations, key casing, controls, and administrator templates.
+---
+
+# Managed policy
+
+## Platform sources
+
+| Platform | Policy source | Key casing |
+|---|---|---|
+| Windows | `HKLM\SOFTWARE\Policies\Scout` | PascalCase |
+| macOS | `/Library/Managed Preferences/com.microsoft.clawpilot.plist` | PascalCase |
+| Linux | `/etc/clawpilot/policy.json` | camelCase |
+| No-root fallback | `<userData>/tenant-policy.json` | camelCase |
+
+The casing difference is operationally important. Linux and the file fallback use
+camelCase JSON keys; Windows registry and macOS managed preferences use PascalCase keys.
+
+## Policy controls
+
+| Canonical control | Type | Purpose |
+|---|---|---|
+| `PolicyVersion` | Integer | Policy schema version |
+| `DisabledServers` | String/list | MCP servers to block |
+| `DisabledPermissions` | String/list | Permission kinds to deny |
+| `ForcePrompt` | Boolean | Require human approval for non-read actions |
+| `DisabledModels` | String/list | Models to hide |
+| `DisabledProviders` | String/list | Model providers to block |
+| `DisableHeartbeat` | Boolean | Disable periodic heartbeat |
+| `DisableWorkflows` | Boolean | Disable scheduled automations |
+| `RestrictToWorkspace` | Boolean | Restrict file and shell access to the workspace |
+| `BrowserEgressBlockedOrigins` | String/list | Block browser egress origins |
+| `AllowScoutFrontierAccess` | Boolean | Enable Frontier access |
+
+## Windows ADMX/ADML
+
+Deploy:
+
+```text
+%systemroot%\PolicyDefinitions\microsoft-scout.admx
+%systemroot%\PolicyDefinitions\en-US\microsoft-scout.adml
+```
+
+The repository templates define machine-level policy under:
+
+```text
+SOFTWARE\Policies\Scout
+```
+
+Element-based string policies keep `valueName` on the child element. Toggle policies keep
+`valueName` on the policy element. This distinction prevents Intune CSP shape errors.
+
+## macOS mobile configuration
+
+The mobile configuration uses:
+
+```text
+PayloadType: com.microsoft.clawpilot
+PayloadIdentifier: com.microsoft.clawpilot.policy
+```
+
+The checked-in UUIDs are public template values. Generate unique payload UUIDs for a real
+profile if required by your management system.
+
+## Linux example
+
+```json
+{
+  "version": 1,
+  "allowScoutFrontierAccess": true,
+  "forcePrompt": true,
+  "restrictToWorkspace": true,
+  "disabledPermissions": ["write"],
+  "browserEgressBlockedOrigins": ["https://blocked.example.com"]
+}
+```
+Use the [normalized policy schema](../reference/schemas#normalized-policy-schema) for
+validation.
+validation.

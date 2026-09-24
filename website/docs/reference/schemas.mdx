@@ -1,0 +1,67 @@
+---
+title: Schemas and templates
+sidebar_position: 1
+description: Downloadable schemas for automation flipcards, Scout policy, deployment configuration, and Entra registration.
+---
+
+# Schemas and templates
+
+The wiki publishes machine-readable artifacts under the site `schemas/` and `templates/`
+paths.
+
+## Flipcard automation schema
+
+Validates privacy-conscious browser-capture records with the identifier
+`clippyclaw.flipcard/v1`.
+
+[Download JSON Schema](pathname:///schemas/clippyclaw.flipcard.v1.schema.json)
+
+```json
+{
+  "schema": "clippyclaw.flipcard/v1",
+  "view": "authentication",
+  "browser": "copilotbrowser",
+  "privacy": "content-viewport screenshot only; no URL bar, no OS chrome",
+  "screenshot": "02-authentication.png",
+  "steps": [
+    {
+      "tool": "browser_click",
+      "args": {
+        "element": "Authentication rail link",
+        "ref": "link:Authentication"
+      }
+    },
+    {
+      "tool": "browser_take_screenshot",
+      "args": {
+        "type": "png",
+        "filename": "02-authentication.png"
+      }
+    }
+  ]
+}
+```
+
+## Normalized policy schema
+
+Validates the platform-neutral camelCase policy model used by Linux JSON and SDK helpers.
+Windows and macOS renderers convert property names to PascalCase.
+
+[Download JSON Schema](pathname:///schemas/scout-policy.schema.json)
+
+## Deployment configuration schema
+
+Validates a JSON representation of Scout Deployer environment configuration. It documents
+required identity, fleet, installer, PuTTY, and asset-path settings without embedding
+private values.
+
+[Download JSON Schema](pathname:///schemas/scout-deployer.config.schema.json)
+
+## Entra app-registration template
+
+Provides the single-tenant audience, public-client posture, three redirect URIs, and all
+eleven delegated Microsoft Graph permission IDs.
+
+[Download registration template](pathname:///templates/entra-app-registration.template.json)
+
+Replace only the documented template tokens in private deployment automation.

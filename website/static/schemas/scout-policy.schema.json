@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayour.github.io/scout-deployer/schemas/scout-policy.schema.json",
+  "title": "Scout Normalized Managed Policy",
+  "description": "Platform-neutral Scout policy. Linux and file sources use these camelCase keys; Windows and macOS renderers use PascalCase.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "disabledServers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "disabledPermissions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "forcePrompt": {
+      "type": "boolean"
+    },
+    "disabledModels": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "disabledProviders": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "disableHeartbeat": {
+      "type": "boolean"
+    },
+    "disableWorkflows": {
+      "type": "boolean"
+    },
+    "restrictToWorkspace": {
+      "type": "boolean"
+    },
+    "browserEgressBlockedOrigins": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "allowScoutFrontierAccess": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayour.github.io/scout-deployer/schemas/clippyclaw.flipcard.v1.schema.json",
+  "title": "ClippyClaw Flipcard Automation Record",
+  "description": "Privacy-conscious browser automation and screenshot capture record.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "view",
+    "browser",
+    "privacy",
+    "screenshot",
+    "steps"
+  ],
+  "properties": {
+    "schema": {
+      "const": "clippyclaw.flipcard/v1"
+    },
+    "view": {
+      "type": "string",
+      "minLength": 1
+    },
+    "browser": {
+      "type": "string",
+      "enum": [
+        "copilotbrowser",
+        "darbot-browser"
+      ]
+    },
+    "privacy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "screenshot": {
+      "type": "string",
+      "pattern": "^[^\\\\/:*?\"<>|]+\\.(png|jpe?g|webp)$"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "args"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "pattern": "^browser_[a-z0-9_]+$"
+        },
+        "args": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

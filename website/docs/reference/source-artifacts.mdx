@@ -1,0 +1,68 @@
+---
+title: Source artifacts
+sidebar_position: 2
+description: Provenance and maintenance guidance for the original sanitized HTML wikis.
+---
+
+# Source artifacts
+
+This Docusaurus wiki consolidates two retained, sanitized source documents.
+
+## Scout architecture and deployment
+
+[`docs/swe-scout-wiki.html`](https://github.com/dayour/scout-deployer/blob/master/docs/swe-scout-wiki.html)
+
+Contributed:
+
+- Architecture Intelligence model
+- Scout control-plane and object model
+- Six-repository relationship map
+- Data and control flow
+- SDK, runtime, orchestration, MCP, and CLI responsibilities
+- Managed policy locations and key casing
+- Deployment provenance and host rollout guidance
+
+## Entra app registration
+
+[`docs/swe_clippyclaw_app_reg.html`](https://github.com/dayour/scout-deployer/blob/master/docs/swe_clippyclaw_app_reg.html)
+
+Contributed:
+
+- Public/native client rationale
+- Single-tenant registration facts
+- Three native redirect URIs
+- Eleven delegated Graph permissions and stable permission IDs
+- Eight-step provisioning runbook
+- Registration verification procedures
+- Runtime wiring and consent guidance
+- Troubleshooting and per-host deployment
+- `clippyclaw.flipcard/v1` browser-automation records
+
+## Sanitization policy
+
+The retained HTML and this wiki intentionally use tokens instead of live environment data:
+
+```text
+{{SCOUT_TENANT_NAME}}
+{{SCOUT_TENANT_ID}}
+{{SCOUT_DOMAIN}}
+{{SCOUT_DOMAIN_ALT}}
+{{SCOUT_LICENSED_USER}}
+{{SCOUT_APP_NAME}}
+{{SCOUT_APP_CLIENT_ID}}
+{{SCOUT_APP_OBJECT_ID}}
+{{GITHUB_ACCOUNT}}
+```
+
+Embedded tenant screenshots, transcripts, private endpoints, and encoded executable
+payloads are excluded from the public artifacts.
+
+## Maintenance rule
+
+When implementation contracts change:
+
+1. Update the canonical code/OpenAPI/schema source.
+2. Update the relevant retained source artifact if it remains authoritative.
+3. Update this Docusaurus page and downloadable schema.
+4. Build with broken-link checks enabled.
+5. Re-run the sensitive-value scan before publication.

@@ -1,0 +1,105 @@
+---
+title: Verification
+sidebar_position: 1
+description: Deployment, policy, identity, consent, and end-to-end production checks.
+---
+
+# Verification
+
+Run these checks after every deployment or identity change.
+
+## Registration shape
+
+```powershell
+az ad app show `
+  --id {{SCOUT_APP_CLIENT_ID}} `
+  --query "{name:displayName,audience:signInAudience,fallback:isFallbackPublicClient,redirects:publicClient.redirectUris}" `
+  -o json
+```
+
+Expected:
+
+```json
+{
+  "name": "{{SCOUT_APP_NAME}}",
+  "audience": "AzureADMyOrg",
+  "fallback": true,
+  "redirects": [
+    "ms-clawpilot://auth/callback",
+    "msauth.com.microsoft.clawpilot://auth",
+    "msauth.com.msauth.unsignedapp://auth"
+  ]
+}
+```
+
+## Delegated permission count
+
+```powershell
+az ad app show `
+  --id {{SCOUT_APP_CLIENT_ID}} `
+  --query "length(requiredResourceAccess[?resourceAppId=='00000003-0000-0000-c000-000000000000'].resourceAccess[])" `
+  -o tsv
+```
+
+Expected: `11`.
+
+## No client-secret dependency
+
+```powershell
+az ad app credential list --id {{SCOUT_APP_CLIENT_ID}} -o table
+```
+
+No password credential is required for desktop sign-in.
+
+## Policy checks
+
+### Windows
+
+```powershell
+Get-ItemProperty "HKLM:\SOFTWARE\Policies\Scout" |
+  Select-Object AllowScoutFrontierAccess
+```
+
+Expected: `AllowScoutFrontierAccess` equals `1`.
+
+### Linux
+
+```bash
+jq . /etc/clawpilot/policy.json
+```
+
+Expected: valid JSON with `allowScoutFrontierAccess` set to `true`.
+
+### macOS
+
+```bash
+defaults read "/Library/Managed Preferences/com.microsoft.clawpilot" \
+  AllowScoutFrontierAccess
+```
+
+Expected: `1`.
+
+## Runtime smoke test
+
+1. Launch Scout after applying policy.
+2. Complete interactive or device-code sign-in.
+3. Confirm the signed-in account belongs to the configured tenant.
+4. Confirm the account has the required Microsoft 365 Copilot license.
+5. Verify that the organization/waitlist gate clears.
+6. Exercise one read-only Graph-backed experience.
+7. Verify Scout API health, node inventory, catalog, and policy routes.
+8. Confirm MCP resources `scout://catalog` and `scout://nodes` resolve.
+9. Dispatch a harmless test task and inspect its status.
+
+## Production readiness
+
+- [ ] Repository and Pages site contain no tenant-specific identifiers or screenshots.
+- [ ] The registration is single-tenant and public-client enabled.
+- [ ] Exactly three native redirect URIs are configured.
+- [ ] Exactly eleven delegated Graph permissions are configured.
+- [ ] No client secret is required.
+- [ ] Admin consent status matches tenant policy.
+- [ ] Platform policy key casing and location are correct.
+- [ ] Deployment logs redact passwords and tokens.
+- [ ] Docusaurus builds with no broken links.
+- [ ] The Pages site loads under `/scout-deployer/` with all assets.

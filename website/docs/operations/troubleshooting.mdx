@@ -1,0 +1,59 @@
+---
+title: Troubleshooting
+sidebar_position: 2
+description: Common Scout deployment, Entra, policy, authentication, and GitHub Pages failures.
+---
+
+# Troubleshooting
+
+| Symptom | Cause and resolution |
+|---|---|
+| Graph scopes remain empty after an update | `az ad app update --required-resource-accesses` may not update an existing app. PATCH `requiredResourceAccess` through Microsoft Graph and verify the count. |
+| `--use-device-code is not applicable with other arguments` | Remove `--username`; run device-code login and select the account in the browser. |
+| `AADSTS70016 authorization pending` followed by expiry | The device code expired. Start a new login and complete it promptly. |
+| Old or generic app icon remains in the portal header | Entra CDN cache can lag. Verify the Branding and properties logo field and wait for cache refresh. |
+| Logo upload is rejected | Use a square PNG/JPEG within the portal size limit and upload it to the application object. |
+| WAM fails in RDP, DevBox, or a non-Entra-joined session | WAM is an optional Windows silent path. Use MSAL interactive or device-code fallback. |
+| Scout says the organization is not enabled | Verify `AllowScoutFrontierAccess` in the correct machine policy source and restart Scout. |
+| Policy appears ignored on Linux | Confirm `/etc/clawpilot/policy.json` is readable, valid JSON, and uses camelCase keys. |
+| Policy appears ignored on Windows or macOS | Confirm the keys use PascalCase and are in the machine-level source. |
+| Gate remains after policy is enabled | Confirm the signed-in user has the required Microsoft 365 Copilot license; policy and licensing are separate gates. |
+| SSH deployment fails before install | Validate hostname resolution, key authorization, host-key fingerprint, PuTTY paths, and local-administrator rights. |
+| Installer succeeds for one profile only | Re-run profile discovery and confirm every intended profile was selected. |
+| GitHub Pages loads HTML but no styles | Verify Docusaurus `baseUrl` is `/scout-deployer/` and uploaded assets retain that path. |
+| GitHub Pages returns 404 | Confirm Pages source is GitHub Actions, the repository is public when required, and the deployment job completed. |
+
+## Identity diagnostics
+
+```powershell
+az account show --query "{tenant:tenantId,user:user.name}" -o json
+
+az ad app show `
+  --id {{SCOUT_APP_CLIENT_ID}} `
+  --query "{appId:appId,objectId:id,audience:signInAudience,fallback:isFallbackPublicClient}" `
+  -o json
+```
+
+## Scope diagnostics
+
+```powershell
+az ad app show `
+  --id {{SCOUT_APP_CLIENT_ID}} `
+  --query "requiredResourceAccess[?resourceAppId=='00000003-0000-0000-c000-000000000000'].resourceAccess" `
+  -o json
+```
+
+Compare the returned IDs with the
+[canonical permission table](../identity/app-registration#delegated-microsoft-graph-permissions).
+
+## Deployment diagnostics
+
+1. Run `.\ScoutDeployer.ps1 -ShowConfig`.
+2. Confirm the installer and PuTTY paths exist.
+3. Test SSH outside the installer workflow.
+4. Inspect the latest configured deployment log.
+5. Confirm the machine policy after installation.
+6. Launch Scout interactively to expose authentication or profile-specific failures.
+Do not paste logs publicly until credentials, tenant data, usernames, hostnames, and local
+paths have been reviewed and redacted.
+paths have been reviewed and redacted.

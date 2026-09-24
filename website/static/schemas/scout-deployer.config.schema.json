@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayour.github.io/scout-deployer/schemas/scout-deployer.config.schema.json",
+  "title": "Scout Deployer Configuration",
+  "description": "JSON representation of Scout Deployer environment configuration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tenantName",
+    "tenantId",
+    "domain",
+    "licensedUser",
+    "appClientId",
+    "appObjectId",
+    "primaryNode",
+    "targetUser",
+    "installerPath",
+    "puttyDirectory"
+  ],
+  "properties": {
+    "tenantName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenantId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "alternateDomain": {
+      "type": "string"
+    },
+    "licensedUser": {
+      "type": "string",
+      "format": "email"
+    },
+    "appName": {
+      "type": "string",
+      "minLength": 1,
+      "default": "Scout"
+    },
+    "appClientId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "appObjectId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "systemName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "primaryNode": {
+      "$ref": "#/$defs/host"
+    },
+    "primaryNodeName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "additionalNodes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/host"
+      }
+    },
+    "targetUser": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sshKeyPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scoutVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "installerPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "puttyDirectory": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skillsRoot": {
+      "type": "string"
+    },
+    "memoryRoot": {
+      "type": "string"
+    },
+    "sessionRoot": {
+      "type": "string"
+    },
+    "connectorsRoot": {
+      "type": "string"
+    },
+    "mcpManifestsRoot": {
+      "type": "string"
+    },
+    "automationsRoot": {
+      "type": "string"
+    },
+    "extensionsList": {
+      "type": "string"
+    },
+    "logDirectory": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "host": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 253
+    }
+  }
+}

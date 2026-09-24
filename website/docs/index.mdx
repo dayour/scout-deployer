@@ -1,0 +1,81 @@
+---
+id: index
+title: Scout Deployer Wiki
+slug: /
+sidebar_position: 1
+description: Production documentation for Microsoft Scout deployment, policy, identity, architecture, schemas, and operations.
+---
+
+<div className="hero-panel">
+  <h1>Scout Deployer</h1>
+  <div className="hero-copy">
+    A production-ready deployment and operations guide for Microsoft Scout across Windows,
+    macOS, and Linux, including Entra identity, managed policy, fleet architecture,
+    verification, troubleshooting, and reusable schemas.
+  </div>
+  <div className="hero-actions">
+    <a className="hero-action hero-action-primary" href="./deployment/runbook">Start deploying</a>
+    <a className="hero-action" href="./architecture/overview">Explore architecture</a>
+    <a className="hero-action" href="./reference/schemas">Use the schemas</a>
+  </div>
+</div>
+
+:::info Public template
+The wiki uses environment placeholders such as `{{SCOUT_TENANT_ID}}`,
+`{{SCOUT_APP_CLIENT_ID}}`, `{{SCOUT_APP_OBJECT_ID}}`, `{{SCOUT_DOMAIN}}`,
+and `{{SCOUT_PRIMARY_NODE_HOST}}`. Substitute real values only in private deployment
+configuration, never in this public repository.
+:::
+
+<div className="metric-grid">
+  <div className="metric"><strong>3</strong><span>supported policy platforms</span></div>
+  <div className="metric"><strong>6</strong><span>architecture repositories</span></div>
+  <div className="metric"><strong>11</strong><span>delegated Graph scopes</span></div>
+  <div className="metric"><strong>9</strong><span>Scout MCP tools</span></div>
+</div>
+
+## Documentation map
+
+<div className="doc-grid">
+  <div className="doc-card">
+    <h3><a href="./architecture/overview">Architecture</a></h3>
+    <p>Control-plane topology, data flow, SDK/runtime/orchestration layers, MCP integration, and repository responsibilities.</p>
+  </div>
+  <div className="doc-card">
+    <h3><a href="./deployment/runbook">Deployment</a></h3>
+    <p>Prerequisites, configuration, Windows deployment, cross-platform policy, provisioning phases, and per-host rollout.</p>
+  </div>
+  <div className="doc-card">
+    <h3><a href="./identity/app-registration">Identity</a></h3>
+    <p>Single-tenant Entra public-client registration, native redirect URIs, delegated permissions, consent, and app wiring.</p>
+  </div>
+  <div className="doc-card">
+    <h3><a href="./operations/verification">Operations</a></h3>
+    <p>Post-deployment checks, registration verification, smoke tests, troubleshooting, and production readiness.</p>
+  </div>
+</div>
+
+## What Scout Deployer manages
+
+Scout Deployer installs Microsoft Scout on remote Windows nodes over PuTTY/SSH and can
+provision the supporting operator surface:
+
+- Scout binary deployment and policy enablement
+- Skills and connector manifests
+- MCP server manifests and tool registration
+- File-system and registry permissions
+- Memory and session-history assets
+- VS Code extensions
+- Scheduled automations and runbooks
+
+The broader architecture adds a typed Scout control plane, SDKs, an execution runtime,
+swarm orchestration, MCP server/host integration, and a standalone CLI.
+
+## Production principles
+
+1. Keep tenant-specific values in `.env`, environment variables, or a secret manager.
+2. Treat desktop identity as a public-client flow; never ship a client secret.
+3. Validate the managed-policy source and key casing for each operating system.
+4. Verify both sides of the Frontier gate: tenant/device policy and licensed user sign-in.
+5. Keep control-plane contracts, SDK models, policy renderers, and MCP tools synchronized.
+6. Run the verification checklist after every identity, policy, installer, or scope change.
